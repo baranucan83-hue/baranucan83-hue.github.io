@@ -1,37 +1,151 @@
-async function sendMessage(){
- if(!aesKey) return alert("Oturum başlat");
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SecureCore</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
- const text=document.getElementById("msg").value.trim();
- if(!text) return;
-
- const iv=crypto.getRandomValues(new Uint8Array(12));
- const encoded=new TextEncoder().encode(text);
-
- const cipher=await crypto.subtle.encrypt(
-   {name:"AES-GCM",iv:iv},
-   aesKey,
-   encoded
- );
-
- const combined=new Uint8Array(iv.length + cipher.byteLength);
- combined.set(iv);
- combined.set(new Uint8Array(cipher), iv.length);
-
- // iPhone safe base64
- let binary = "";
- for (let i = 0; i < combined.length; i++) {
-   binary += String.fromCharCode(combined[i]);
- }
- const base64 = btoa(binary);
-
- const tx=db.transaction("messages","readwrite");
- tx.objectStore("messages").add({
-   room:currentRoom,
-   user:currentUser,
-   data:base64,
-   time:new Date().toLocaleString()
- });
-
- document.getElementById("msg").value="";
- loadMessages();
+<style>
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  color:white;
+  text-align:center;
+  padding-top:60px;
 }
+h1{font-size:40px;}
+input{
+  padding:12px;
+  width:80%;
+  max-width:350px;
+  border-radius:8px;
+  border:none;
+  margin:10px 0;
+}
+button{
+  padding:12px 20px;
+  font-size:16px;
+  border:none;
+  border-radius:8px;
+  background:#00c6ff;
+  color:white;
+  cursor:pointer;
+  margin:5px;
+}
+#sonuc{
+  margin-top:20px;
+  font-size:18px;
+  word-wrap:break-word;
+}
+</style>
+</head>
+<body>
+
+<h1>SecureCore 🔐</h1>
+<p>Güçlü AES-256 Şifreleme</p>
+
+<input type="text" id="secretKey" placeholder="Gizli anahtar gir">
+<br>
+<input type="text" id="metin" placeholder="Mesaj gir">
+<br>
+
+<button onclick="sifrele()">Şifrele</button>
+<button onclick="coz()">Şifre Çöz</button>
+
+<div id="sonuc"></div>
+
+<script>
+
+async function getKey(password){
+  const enc = new TextEncoder();
+  const hash = await crypto.subtle.digest("SHA-256", enc.encode(password));
+  return crypto.subtle.importKey(
+    "raw",
+    hash,
+    { name: "AES-GCM" },
+    false,
+    ["encrypt","decrypt"]
+  );
+}
+
+function arrayBufferToBase64(buffer){
+  let binary="";
+  let bytes=new Uint8Array(buffer);
+  for(let i=0;i<bytes.byteLength;i++){
+    binary+=String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+function base64ToArrayBuffer(base64){
+  let binary=atob(base64);
+  let bytes=new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++){
+    bytes[i]=binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
+async function sifrele(){
+  const password=document.getElementById("secretKey").value;
+  const text=document.getElementById("metin").value;
+
+  if(!password||!text){
+    alert("Anahtar ve mesaj gerekli!");
+    return;
+  }
+
+  const key=await getKey(password);
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+
+  const enc=new TextEncoder();
+  const cipher=await crypto.subtle.encrypt(
+    {name:"AES-GCM",iv:iv},
+    key,
+    enc.encode(text)
+  );
+
+  const combined=new Uint8Array(iv.length + cipher.byteLength);
+  combined.set(iv,0);
+  combined.set(new Uint8Array(cipher),iv.length);
+
+  document.getElementById("sonuc").innerText=
+    "Şifreli:\n"+arrayBufferToBase64(combined);
+}
+
+async function coz(){
+  const password=document.getElementById("secretKey").value;
+  const text=document.getElementById("metin").value;
+
+  if(!password||!text){
+    alert("Anahtar ve şifreli metin gerekli!");
+    return;
+  }
+
+  try{
+    const key=await getKey(password);
+    const data=base64ToArrayBuffer(text);
+
+    const iv=data.slice(0,12);
+    const cipher=data.slice(12);
+
+    const decrypted=await crypto.subtle.decrypt(
+      {name:"AES-GCM",iv:iv},
+      key,
+      cipher
+    );
+
+    const dec=new TextDecoder();
+    document.getElementById("sonuc").innerText=
+      "Çözüldü:\n"+dec.decode(decrypted);
+
+  }catch(e){
+    document.getElementById("sonuc").innerText=
+      "Hatalı anahtar veya bozuk veri!";
+  }
+}
+
+</script>
+</body>
+</html>
