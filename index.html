@@ -1,1 +1,37 @@
+async function sendMessage(){
+ if(!aesKey) return alert("Oturum başlat");
 
+ const text=document.getElementById("msg").value.trim();
+ if(!text) return;
+
+ const iv=crypto.getRandomValues(new Uint8Array(12));
+ const encoded=new TextEncoder().encode(text);
+
+ const cipher=await crypto.subtle.encrypt(
+   {name:"AES-GCM",iv:iv},
+   aesKey,
+   encoded
+ );
+
+ const combined=new Uint8Array(iv.length + cipher.byteLength);
+ combined.set(iv);
+ combined.set(new Uint8Array(cipher), iv.length);
+
+ // iPhone safe base64
+ let binary = "";
+ for (let i = 0; i < combined.length; i++) {
+   binary += String.fromCharCode(combined[i]);
+ }
+ const base64 = btoa(binary);
+
+ const tx=db.transaction("messages","readwrite");
+ tx.objectStore("messages").add({
+   room:currentRoom,
+   user:currentUser,
+   data:base64,
+   time:new Date().toLocaleString()
+ });
+
+ document.getElementById("msg").value="";
+ loadMessages();
+}
