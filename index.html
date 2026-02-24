@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SecureCore X</title>
+<title>SecureCore X 🔥</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
@@ -15,7 +15,7 @@ body{
   display:flex;
   justify-content:center;
   align-items:center;
-  background:radial-gradient(circle at 20% 20%,#00f0ff22,#000814 60%);
+  background:black;
   overflow:hidden;
   color:white;
 }
@@ -25,9 +25,9 @@ body::before{
   position:absolute;
   width:200%;
   height:200%;
-  background:conic-gradient(from 0deg,#00f0ff,#8a2be2,#00f0ff);
-  animation:spin 12s linear infinite;
-  opacity:0.1;
+  background:conic-gradient(from 0deg,#ff0000,#8a2be2,#00ffff,#ff0000);
+  animation:spin 10s linear infinite;
+  opacity:0.15;
 }
 @keyframes spin{
   from{transform:rotate(0deg)}
@@ -37,13 +37,13 @@ body::before{
 .container{
   position:relative;
   width:95%;
-  max-width:950px;
+  max-width:900px;
   height:90vh;
-  backdrop-filter:blur(25px);
-  background:rgba(255,255,255,0.05);
-  border-radius:25px;
+  backdrop-filter:blur(20px);
+  background:rgba(0,0,0,0.4);
+  border-radius:20px;
   padding:25px;
-  box-shadow:0 0 50px #00f0ff44;
+  box-shadow:0 0 60px #ff0000cc;
   display:flex;
   flex-direction:column;
 }
@@ -51,9 +51,17 @@ body::before{
 h1{
   font-family:Orbitron;
   text-align:center;
-  font-size:28px;
-  margin-bottom:15px;
-  letter-spacing:2px;
+  font-size:36px;
+  margin-bottom:20px;
+  letter-spacing:3px;
+  color:#ff0000;
+  text-shadow:0 0 10px #ff0000,0 0 20px #8a2be2;
+  animation:glow 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes glow{
+  from {text-shadow:0 0 10px #ff0000,0 0 20px #8a2be2;}
+  to {text-shadow:0 0 20px #ff0000,0 0 40px #00ffff;}
 }
 
 input{
@@ -62,8 +70,15 @@ input{
   border-radius:12px;
   margin:6px 0;
   width:100%;
-  background:rgba(255,255,255,0.08);
+  background:rgba(255,255,255,0.05);
   color:white;
+  border:1px solid #ff0000;
+  transition:0.3s;
+}
+input:focus{
+  outline:none;
+  border:1px solid #00ffff;
+  box-shadow:0 0 10px #00ffff;
 }
 
 button{
@@ -73,11 +88,14 @@ button{
   margin:6px 0;
   cursor:pointer;
   font-weight:bold;
-  background:linear-gradient(45deg,#00f0ff,#8a2be2);
+  background:linear-gradient(45deg,#ff0000,#8a2be2);
   color:white;
   transition:0.3s;
 }
-button:hover{transform:scale(1.05)}
+button:hover{
+  transform:scale(1.05);
+  box-shadow:0 0 15px #ff0000;
+}
 
 #chat{
   flex:1;
@@ -85,15 +103,18 @@ button:hover{transform:scale(1.05)}
   margin:10px 0;
   padding:10px;
   border-radius:15px;
-  background:rgba(0,0,0,0.25);
+  background:rgba(0,0,0,0.3);
 }
 
 .message{
   padding:10px;
   margin-bottom:10px;
   border-radius:12px;
-  background:rgba(255,255,255,0.08);
+  background:rgba(255,255,255,0.05);
   animation:fadeIn 0.4s ease;
+  display:flex;
+  flex-direction:column;
+  position:relative;
 }
 @keyframes fadeIn{
   from{opacity:0;transform:translateY(10px)}
@@ -101,12 +122,26 @@ button:hover{transform:scale(1.05)}
 }
 
 .small{font-size:11px;opacity:0.6}
-
-.delete{
+.delete, .decodeBtn{
   background:#ff3b3b;
   padding:4px 8px;
   font-size:11px;
   margin-top:5px;
+  cursor:pointer;
+}
+.decodeBtn{
+  background:#00ffff;
+  color:black;
+  margin-left:5px;
+}
+
+.decoded{
+  animation:glowText 1s ease forwards;
+}
+@keyframes glowText{
+  0%{color:white; text-shadow: none;}
+  50%{color:#00ffff; text-shadow:0 0 10px #00ffff,0 0 20px #8a2be2;}
+  100%{color:#00ffff; text-shadow:0 0 15px #00ffff,0 0 30px #8a2be2;}
 }
 
 .online{
@@ -120,7 +155,7 @@ button:hover{transform:scale(1.05)}
 
 <div class="container">
 
-<h1>SecureCore X 🔐</h1>
+<h1>SecureCore X 🔥</h1>
 
 <div id="loginBox">
   <input id="email" placeholder="Email">
@@ -139,13 +174,11 @@ button:hover{transform:scale(1.05)}
 
 </div>
 
-<!-- Firebase compat SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
 <script>
-// 🔹 Yeni Firebase config (compat uyumlu)
 const firebaseConfig = {
   apiKey: "AIzaSyB9hBRTJ4BLMLpmAPxwPdbrNbk2UuAV3i4",
   authDomain: "core-chat-3be96.firebaseapp.com",
@@ -157,12 +190,10 @@ const firebaseConfig = {
   measurementId: "G-MK4ZWQE0GG"
 };
 
-// Firebase başlatma (compat sürüm)
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// 🔹 Giriş Fonksiyonu
 function login(){
   auth.signInWithEmailAndPassword(email.value,password.value)
   .then(()=>{
@@ -179,21 +210,15 @@ auth.onAuthStateChanged(user=>{
   }
 });
 
-// 🔹 Mesaj şifreleme / çözme
 async function getKey(password){
   const enc = new TextEncoder();
   const hash = await crypto.subtle.digest("SHA-256",enc.encode(password));
   return crypto.subtle.importKey("raw",hash,{name:"AES-GCM"},false,["encrypt","decrypt"]);
 }
 
-function ab2b64(buffer){
-  return btoa(String.fromCharCode(...new Uint8Array(buffer)));
-}
-function b642ab(base64){
-  return Uint8Array.from(atob(base64),c=>c.charCodeAt(0));
-}
+function ab2b64(buffer){ return btoa(String.fromCharCode(...new Uint8Array(buffer))); }
+function b642ab(base64){ return Uint8Array.from(atob(base64),c=>c.charCodeAt(0)); }
 
-// 🔹 Mesaj gönderme
 async function sendMessage(){
   if(!room.value || !secretKey.value || !mesaj.value) return alert("Alanlar boş olamaz");
 
@@ -215,8 +240,13 @@ async function sendMessage(){
   mesaj.value = "";
 }
 
-// 🔹 Mesajları dinleme
+// Enter ile gönder
+mesaj.addEventListener("keypress", e=>{
+  if(e.key==="Enter") sendMessage();
+});
+
 let currentRoom = null;
+const colors = ["#ff0000","#8a2be2","#00ffff","#ffa500","#00ff00","#ff00ff","#ffff00"];
 
 room.addEventListener("change",()=>{
   chat.innerHTML="";
@@ -227,19 +257,35 @@ room.addEventListener("change",()=>{
     const data = snap.val();
     const id = snap.key;
 
-    let text = "🔒 Anahtar gerekli";
-    try{
-      const key = await getKey(secretKey.value);
-      const raw = b642ab(data.message);
-      const iv = raw.slice(0,12);
-      const cipher = raw.slice(12);
-      const dec = await crypto.subtle.decrypt({name:"AES-GCM",iv:iv},key,cipher);
-      text = new TextDecoder().decode(dec);
-    }catch{}
-
     const div = document.createElement("div");
     div.className="message";
-    div.innerHTML=`<b>${data.user}</b><div>${text}</div><div class="small">${new Date(data.time).toLocaleString()}</div>`;
+
+    // Kullanıcı rengi
+    const userColor = colors[data.user.charCodeAt(0) % colors.length];
+
+    div.innerHTML=`<b style="color:${userColor}">${data.user}</b>
+                   <div class="encrypted">🔒 Şifreli mesaj</div>
+                   <div class="small">${new Date(data.time).toLocaleString()}</div>`;
+
+    const decodeBtn = document.createElement("button");
+    decodeBtn.textContent="Çöz";
+    decodeBtn.className="decodeBtn";
+    decodeBtn.onclick = async ()=>{
+      try{
+        const key = await getKey(secretKey.value);
+        const raw = b642ab(data.message);
+        const iv = raw.slice(0,12);
+        const cipher = raw.slice(12);
+        const dec = await crypto.subtle.decrypt({name:"AES-GCM",iv:iv},key,cipher);
+        const text = new TextDecoder().decode(dec);
+        const encryptedDiv = div.querySelector(".encrypted");
+        encryptedDiv.textContent = text;
+        encryptedDiv.classList.add("decoded");
+      }catch{
+        alert("Şifre çözülemedi! Anahtar yanlış olabilir.");
+      }
+    };
+    div.appendChild(decodeBtn);
 
     if(auth.currentUser.email===data.user){
       const del=document.createElement("button");
