@@ -12,7 +12,7 @@ body{
   background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
   color:white;
   text-align:center;
-  padding-top:60px;
+  padding-top:40px;
 }
 h1{font-size:40px;}
 input{
@@ -35,38 +35,99 @@ button{
 }
 #sonuc{
   margin-top:20px;
-  font-size:18px;
+  font-size:16px;
   word-wrap:break-word;
+}
+#chat{
+  margin-top:20px;
+  max-height:250px;
+  overflow:auto;
+  background:rgba(255,255,255,0.1);
+  padding:10px;
+  border-radius:10px;
 }
 </style>
 </head>
 <body>
 
 <h1>SecureCore 🔐</h1>
-<p>Güçlü AES-256 Şifreleme</p>
+
+<!-- LOGIN -->
+<div id="loginBox">
+  <h3>Giriş Yap</h3>
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Şifre">
+  <button onclick="login()">Giriş</button>
+</div>
+
+<!-- ANA UYGULAMA -->
+<div id="appBox" style="display:none;">
+
+<p>AES-256 Şifreleme + Canlı Chat</p>
 
 <input type="text" id="secretKey" placeholder="Gizli anahtar gir">
 <br>
 <input type="text" id="metin" placeholder="Mesaj gir">
 <br>
 
-<button onclick="sifrele()">Şifrele</button>
+<button onclick="sifrele()">Şifrele & Gönder</button>
 <button onclick="coz()">Şifre Çöz</button>
 
 <div id="sonuc"></div>
 
+<div id="chat"></div>
+
+</div>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyB9hBRTJ4BLMLpmAPxwPdbrNbk2UuAV3i4",
+  authDomain: "core-chat-3be96.firebaseapp.com",
+  databaseURL: "https://core-chat-3be96-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "core-chat-3be96",
+  storageBucket: "core-chat-3be96.appspot.com",
+  messagingSenderId: "555994455959",
+  appId: "1:555994455959:web:9dbd659b1970c491042ed2"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+const room = "secure-room";
+
+function login(){
+  const email=document.getElementById("email").value;
+  const password=document.getElementById("password").value;
+
+  auth.signInWithEmailAndPassword(email,password)
+  .then(()=>{
+    document.getElementById("loginBox").style.display="none";
+    document.getElementById("appBox").style.display="block";
+  })
+  .catch(e=>alert(e.message));
+}
+
+auth.onAuthStateChanged(user=>{
+  if(user){
+    document.getElementById("loginBox").style.display="none";
+    document.getElementById("appBox").style.display="block";
+  }
+});
+</script>
+
 <script>
 
+// ===== AES KISMI =====
+
 async function getKey(password){
-  const enc = new TextEncoder();
-  const hash = await crypto.subtle.digest("SHA-256", enc.encode(password));
-  return crypto.subtle.importKey(
-    "raw",
-    hash,
-    { name: "AES-GCM" },
-    false,
-    ["encrypt","decrypt"]
-  );
+  const enc=new TextEncoder();
+  const hash=await crypto.subtle.digest("SHA-256",enc.encode(password));
+  return crypto.subtle.importKey("raw",hash,{name:"AES-GCM"},false,["encrypt","decrypt"]);
 }
 
 function arrayBufferToBase64(buffer){
@@ -90,62 +151,63 @@ function base64ToArrayBuffer(base64){
 async function sifrele(){
   const password=document.getElementById("secretKey").value;
   const text=document.getElementById("metin").value;
-
-  if(!password||!text){
-    alert("Anahtar ve mesaj gerekli!");
-    return;
-  }
+  if(!password||!text){ alert("Anahtar ve mesaj gerekli!"); return; }
 
   const key=await getKey(password);
   const iv=crypto.getRandomValues(new Uint8Array(12));
-
   const enc=new TextEncoder();
-  const cipher=await crypto.subtle.encrypt(
-    {name:"AES-GCM",iv:iv},
-    key,
-    enc.encode(text)
-  );
+  const cipher=await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,enc.encode(text));
 
-  const combined=new Uint8Array(iv.length + cipher.byteLength);
+  const combined=new Uint8Array(iv.length+cipher.byteLength);
   combined.set(iv,0);
   combined.set(new Uint8Array(cipher),iv.length);
 
-  document.getElementById("sonuc").innerText=
-    "Şifreli:\n"+arrayBufferToBase64(combined);
+  const finalMessage=arrayBufferToBase64(combined);
+
+  document.getElementById("sonuc").innerText="Şifreli:\n"+finalMessage;
+
+  // Firebase'e gönder
+  db.ref("rooms/"+room).push({
+    message: finalMessage,
+    user: auth.currentUser.email,
+    time: Date.now()
+  });
+
+  document.getElementById("metin").value="";
 }
 
 async function coz(){
   const password=document.getElementById("secretKey").value;
   const text=document.getElementById("metin").value;
 
-  if(!password||!text){
-    alert("Anahtar ve şifreli metin gerekli!");
-    return;
-  }
-
   try{
     const key=await getKey(password);
     const data=base64ToArrayBuffer(text);
-
     const iv=data.slice(0,12);
     const cipher=data.slice(12);
 
-    const decrypted=await crypto.subtle.decrypt(
-      {name:"AES-GCM",iv:iv},
-      key,
-      cipher
-    );
-
+    const decrypted=await crypto.subtle.decrypt({name:"AES-GCM",iv:iv},key,cipher);
     const dec=new TextDecoder();
-    document.getElementById("sonuc").innerText=
-      "Çözüldü:\n"+dec.decode(decrypted);
+    document.getElementById("sonuc").innerText="Çözüldü:\n"+dec.decode(decrypted);
 
-  }catch(e){
-    document.getElementById("sonuc").innerText=
-      "Hatalı anahtar veya bozuk veri!";
+  }catch{
+    document.getElementById("sonuc").innerText="Hatalı anahtar veya veri!";
   }
 }
 
+// ===== CANLI MESAJ DİNLEME =====
+
+db.ref("rooms/"+room).on("child_added",snapshot=>{
+  const data=snapshot.val();
+  const chat=document.getElementById("chat");
+
+  chat.innerHTML+=`
+    <div><b>${data.user}</b>: ${data.message}</div>
+  `;
+  chat.scrollTop=chat.scrollHeight;
+});
+
 </script>
+
 </body>
 </html>
