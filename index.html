@@ -20,7 +20,6 @@ body{
   color:white;
 }
 
-/* animated neon background */
 body::before{
   content:"";
   position:absolute;
@@ -146,13 +145,14 @@ button:hover{transform:scale(1.05)}
 
 <script>
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  databaseURL: "YOUR_DATABASE_URL",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyB9hBRTJ4BLMLpmAPxwPdbrNbk2UuAV3i4",
+  authDomain: "core-chat-3be96.firebaseapp.com",
+  databaseURL: "https://core-chat-3be96-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "core-chat-3be96",
+  storageBucket: "core-chat-3be96.firebasestorage.app",
+  messagingSenderId: "555994455959",
+  appId: "1:555994455959:web:9dbd659b1970c491042ed2",
+  measurementId: "G-MK4ZWQE0GG"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -246,7 +246,6 @@ room.addEventListener("change",()=>{
     chat.scrollTop=chat.scrollHeight;
   });
 
-  // online count
   db.ref("rooms/"+currentRoom).on("value",snap=>{
     onlineCount.textContent="Mesaj Sayısı: "+snap.numChildren();
   });
