@@ -13,14 +13,25 @@ body{
   display:flex;
   justify-content:center;
   align-items:center;
-  background: linear-gradient(135deg, #0f2027, #203a43, #ff6f91);
+  background: url('https://source.unsplash.com/1600x900/?technology,abstract') no-repeat center center fixed;
+  background-size: cover;
+  position: relative;
   color:white;
 }
+body::before{
+  content:"";
+  position:absolute;
+  top:0; left:0; right:0; bottom:0;
+  background: rgba(0,0,0,0.5);
+  z-index:0;
+}
 .container{
+  position: relative;
+  z-index:1;
   width:95%;
   max-width:900px;
   height:90vh;
-  background:rgba(0,0,0,0.6);
+  background: rgba(0,0,0,0.6);
   border-radius:15px;
   padding:20px;
   display:flex;
@@ -54,25 +65,28 @@ button{
   font-weight:bold;
   background:#ff6f91;
   color:white;
+  transition:0.2s;
 }
-button:hover{opacity:0.9;}
+button:hover{opacity:0.9; transform: scale(1.05);}
 #chat{
   flex:1;
   overflow:auto;
   margin:10px 0;
   padding:10px;
   border-radius:10px;
-  background:#203a43;
+  background:#203a43cc;
 }
 .message{
   padding:10px;
   margin-bottom:10px;
   border-radius:10px;
-  background:#30475e;
+  background:#30475ecc;
   display:flex;
   flex-direction:column;
   position:relative;
+  transition: 0.3s;
 }
+.message:hover{box-shadow: 0 0 15px #ff6f91; transform: scale(1.02);}
 .small{font-size:11px;opacity:0.6;}
 .delete{
   background:#ff4444;
@@ -93,6 +107,12 @@ button:hover{opacity:0.9;}
   opacity:0.7;
   margin-bottom:5px;
 }
+.avatar{
+  width:28px; height:28px; border-radius:50%; margin-right:6px;
+}
+.userRow{
+  display:flex; align-items:center;
+}
 </style>
 </head>
 <body>
@@ -103,6 +123,8 @@ button:hover{opacity:0.9;}
 <div id="loginBox">
   <input id="email" placeholder="Email">
   <input id="password" type="password" placeholder="Şifre">
+  <input id="nickname" placeholder="Takma ad">
+  <input id="avatarURL" placeholder="Profil resmi URL (opsiyonel)">
   <button onclick="login()">Giriş Yap</button>
 </div>
 
@@ -121,7 +143,6 @@ button:hover{opacity:0.9;}
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
 <script>
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyB9hBRTJ4BLMLpmAPxwPdbrNbk2UuAV3i4",
   authDomain: "core-chat-3be96.firebaseapp.com",
@@ -131,49 +152,46 @@ const firebaseConfig = {
   messagingSenderId: "555994455959",
   appId: "1:555994455959:web:9dbd659b1970c491042ed2"
 };
-
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// Kullanıcı login
+// Login
 function login(){
+  if(!nickname.value) return alert("Takma ad boş olamaz!");
   auth.signInWithEmailAndPassword(email.value,password.value)
-  .then(()=>{loginBox.style.display="none"; appBox.style.display="flex";})
+  .then(user=>{
+    const uid = auth.currentUser.uid;
+    db.ref("users/"+uid).set({
+      nickname: nickname.value,
+      avatar: avatarURL.value || ''
+    });
+    loginBox.style.display="none"; appBox.style.display="flex";
+  })
   .catch(e=>alert(e.message));
 }
-
 auth.onAuthStateChanged(user=>{
   if(user){loginBox.style.display="none"; appBox.style.display="flex";}
 });
 
-// Mesaj şifreleme key
+// Encryption
 async function getKey(password){
   const enc = new TextEncoder();
   const hash = await crypto.subtle.digest("SHA-256",enc.encode(password));
   return crypto.subtle.importKey("raw",hash,{name:"AES-GCM"},false,["encrypt","decrypt"]);
 }
-
-// Base64 dönüşümleri
 function ab2b64(buffer){ return btoa(String.fromCharCode(...new Uint8Array(buffer))); }
 function b642ab(base64){ return Uint8Array.from(atob(base64),c=>c.charCodeAt(0)); }
-
-// HTML escape (XSS koruması)
-function escapeHTML(text){
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
+function escapeHTML(text){ const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
 
 // Rate limit
 let lastSent = 0;
 
-// Mesaj gönder
+// Send message
 async function sendMessage(){
   const now = Date.now();
-  if(now - lastSent < 1000) return alert("Lütfen 1 saniyede bir mesaj gönderin");
+  if(now - lastSent < 1000) return alert("1 saniyede bir mesaj gönderebilirsiniz");
   lastSent = now;
-
   if(!room.value || !secretKey.value || !mesaj.value) return alert("Alanlar boş olamaz");
 
   const key = await getKey(secretKey.value);
@@ -184,9 +202,14 @@ async function sendMessage(){
   combined.set(iv,0);
   combined.set(new Uint8Array(cipher),iv.length);
 
+  const userRef = db.ref("users/"+auth.currentUser.uid);
+  const userData = (await userRef.get()).val();
+
   db.ref("rooms/"+room.value).push({
     message: ab2b64(combined),
     user: auth.currentUser.email,
+    nickname: userData.nickname,
+    avatar: userData.avatar || '',
     time: Date.now()
   });
 
@@ -198,7 +221,7 @@ mesaj.addEventListener("keypress", e=>{if(e.key==="Enter") sendMessage();});
 let currentRoom = null;
 const colors = ["#ff4444","#00ffff","#ffaa00","#00ff00","#ff00ff","#ff6f91"];
 
-// Oda değişimi ve mesaj dinleme
+// Room change
 room.addEventListener("change",()=>{
   chat.innerHTML="";
   if(currentRoom) db.ref("rooms/"+currentRoom).off();
@@ -211,9 +234,8 @@ room.addEventListener("change",()=>{
 
     const div = document.createElement("div");
     div.className="message";
-    const userColor = colors[data.user.charCodeAt(0) % colors.length];
+    const userColor = colors[data.nickname.charCodeAt(0) % colors.length];
 
-    // Mesaj otomatik çöz
     let text="🔒 Mesaj çözülemedi!";
     try{
       const key = await getKey(secretKey.value);
@@ -224,7 +246,8 @@ room.addEventListener("change",()=>{
       text = escapeHTML(new TextDecoder().decode(dec));
     }catch{}
 
-    div.innerHTML = `<b style="color:${userColor}">${data.user}</b>
+    const avatarImg = data.avatar ? `<img src="${escapeHTML(data.avatar)}" class="avatar">` : '';
+    div.innerHTML = `<div class="userRow">${avatarImg}<b style="color:${userColor}">${escapeHTML(data.nickname)}</b></div>
                      <div class="decoded">${text}</div>
                      <div class="small">${new Date(data.time).toLocaleString()}</div>`;
 
