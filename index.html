@@ -3,10 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SecureCore X 🔥</title>
-
+<title>SecureCore X 🌌</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{
@@ -15,147 +13,92 @@ body{
   display:flex;
   justify-content:center;
   align-items:center;
-  background:black;
-  overflow:hidden;
+  background: #1e2a38; /* huzur veren gece mavisi */
   color:white;
 }
-
-body::before{
-  content:"";
-  position:absolute;
-  width:200%;
-  height:200%;
-  background:conic-gradient(from 0deg,#ff0000,#8a2be2,#00ffff,#ff0000);
-  animation:spin 10s linear infinite;
-  opacity:0.15;
-}
-@keyframes spin{
-  from{transform:rotate(0deg)}
-  to{transform:rotate(360deg)}
-}
-
 .container{
-  position:relative;
   width:95%;
   max-width:900px;
   height:90vh;
-  backdrop-filter:blur(20px);
-  background:rgba(0,0,0,0.4);
-  border-radius:20px;
-  padding:25px;
-  box-shadow:0 0 60px #ff0000cc;
+  background:#2a3b4d; /* biraz daha açık ton */
+  border-radius:15px;
+  padding:20px;
   display:flex;
   flex-direction:column;
+  box-shadow:0 0 15px rgba(0,0,0,0.5);
 }
-
 h1{
   font-family:Orbitron;
   text-align:center;
-  font-size:36px;
-  margin-bottom:20px;
-  letter-spacing:3px;
-  color:#ff0000;
-  text-shadow:0 0 10px #ff0000,0 0 20px #8a2be2;
-  animation:glow 1.5s ease-in-out infinite alternate;
+  font-size:32px;
+  margin-bottom:15px;
+  color:#a0e7ff;
 }
-
-@keyframes glow{
-  from {text-shadow:0 0 10px #ff0000,0 0 20px #8a2be2;}
-  to {text-shadow:0 0 20px #ff0000,0 0 40px #00ffff;}
-}
-
 input{
   padding:12px;
   border:none;
-  border-radius:12px;
-  margin:6px 0;
+  border-radius:10px;
+  margin:5px 0;
   width:100%;
-  background:rgba(255,255,255,0.05);
+  background:#3b4f63;
   color:white;
-  border:1px solid #ff0000;
-  transition:0.3s;
+  border:1px solid #a0e7ff;
 }
-input:focus{
-  outline:none;
-  border:1px solid #00ffff;
-  box-shadow:0 0 10px #00ffff;
-}
-
+input:focus{outline:none;border:1px solid #ffd6a5;}
 button{
   padding:10px;
   border:none;
-  border-radius:12px;
-  margin:6px 0;
+  border-radius:10px;
+  margin:5px 0;
   cursor:pointer;
   font-weight:bold;
-  background:linear-gradient(45deg,#ff0000,#8a2be2);
+  background:#00b4d8;
   color:white;
-  transition:0.3s;
 }
-button:hover{
-  transform:scale(1.05);
-  box-shadow:0 0 15px #ff0000;
-}
-
+button:hover{opacity:0.9;}
 #chat{
   flex:1;
   overflow:auto;
   margin:10px 0;
   padding:10px;
-  border-radius:15px;
-  background:rgba(0,0,0,0.3);
+  border-radius:10px;
+  background:#3b4f63;
 }
-
 .message{
   padding:10px;
   margin-bottom:10px;
-  border-radius:12px;
-  background:rgba(255,255,255,0.05);
-  animation:fadeIn 0.4s ease;
+  border-radius:10px;
+  background:#41668c;
   display:flex;
   flex-direction:column;
   position:relative;
 }
-@keyframes fadeIn{
-  from{opacity:0;transform:translateY(10px)}
-  to{opacity:1;transform:translateY(0)}
-}
-
-.small{font-size:11px;opacity:0.6}
-.delete, .decodeBtn{
-  background:#ff3b3b;
+.small{font-size:11px;opacity:0.6;}
+.delete{
+  background:#ff6b6b;
   padding:4px 8px;
   font-size:11px;
   margin-top:5px;
   cursor:pointer;
+  border:none;
+  border-radius:5px;
 }
-.decodeBtn{
-  background:#00ffff;
-  color:black;
-  margin-left:5px;
-}
-
 .decoded{
-  animation:glowText 1s ease forwards;
+  color:#ffd166;
+  font-weight:bold;
 }
-@keyframes glowText{
-  0%{color:white; text-shadow: none;}
-  50%{color:#00ffff; text-shadow:0 0 10px #00ffff,0 0 20px #8a2be2;}
-  100%{color:#00ffff; text-shadow:0 0 15px #00ffff,0 0 30px #8a2be2;}
-}
-
 .online{
   font-size:12px;
   text-align:right;
   opacity:0.7;
+  margin-bottom:5px;
 }
 </style>
 </head>
 <body>
 
 <div class="container">
-
-<h1>SecureCore X 🔥</h1>
+<h1>SecureCore X 🌌</h1>
 
 <div id="loginBox">
   <input id="email" placeholder="Email">
@@ -171,7 +114,6 @@ button:hover{
   <input id="mesaj" placeholder="Mesaj yaz...">
   <button onclick="sendMessage()">Gönder</button>
 </div>
-
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -186,8 +128,7 @@ const firebaseConfig = {
   projectId: "core-chat-3be96",
   storageBucket: "core-chat-3be96.firebasestorage.app",
   messagingSenderId: "555994455959",
-  appId: "1:555994455959:web:9dbd659b1970c491042ed2",
-  measurementId: "G-MK4ZWQE0GG"
+  appId: "1:555994455959:web:9dbd659b1970c491042ed2"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -196,18 +137,12 @@ const db = firebase.database();
 
 function login(){
   auth.signInWithEmailAndPassword(email.value,password.value)
-  .then(()=>{
-    loginBox.style.display="none";
-    appBox.style.display="flex";
-  })
+  .then(()=>{loginBox.style.display="none"; appBox.style.display="flex";})
   .catch(e=>alert(e.message));
 }
 
 auth.onAuthStateChanged(user=>{
-  if(user){
-    loginBox.style.display="none";
-    appBox.style.display="flex";
-  }
+  if(user){loginBox.style.display="none"; appBox.style.display="flex";}
 });
 
 async function getKey(password){
@@ -221,32 +156,21 @@ function b642ab(base64){ return Uint8Array.from(atob(base64),c=>c.charCodeAt(0))
 
 async function sendMessage(){
   if(!room.value || !secretKey.value || !mesaj.value) return alert("Alanlar boş olamaz");
-
   const key = await getKey(secretKey.value);
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const enc = new TextEncoder();
   const cipher = await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,enc.encode(mesaj.value));
-
   const combined = new Uint8Array(iv.length + cipher.byteLength);
   combined.set(iv,0);
   combined.set(new Uint8Array(cipher),iv.length);
-
-  db.ref("rooms/" + room.value).push({
-    message: ab2b64(combined),
-    user: auth.currentUser.email,
-    time: Date.now()
-  });
-
-  mesaj.value = "";
+  db.ref("rooms/"+room.value).push({message: ab2b64(combined), user: auth.currentUser.email, time: Date.now()});
+  mesaj.value="";
 }
 
-// Enter ile gönder
-mesaj.addEventListener("keypress", e=>{
-  if(e.key==="Enter") sendMessage();
-});
+mesaj.addEventListener("keypress", e=>{if(e.key==="Enter") sendMessage();});
 
 let currentRoom = null;
-const colors = ["#ff0000","#8a2be2","#00ffff","#ffa500","#00ff00","#ff00ff","#ffff00"];
+const colors = ["#ff4444","#00ffff","#ffaa00","#00ff00","#ff00ff"];
 
 room.addEventListener("change",()=>{
   chat.innerHTML="";
@@ -259,39 +183,28 @@ room.addEventListener("change",()=>{
 
     const div = document.createElement("div");
     div.className="message";
-
-    // Kullanıcı rengi
     const userColor = colors[data.user.charCodeAt(0) % colors.length];
 
-    div.innerHTML=`<b style="color:${userColor}">${data.user}</b>
-                   <div class="encrypted">🔒 Şifreli mesaj</div>
-                   <div class="small">${new Date(data.time).toLocaleString()}</div>`;
+    // Mesajı otomatik çöz
+    let text="🔒 Mesaj çözülemedi!";
+    try{
+      const key = await getKey(secretKey.value);
+      const raw = b642ab(data.message);
+      const iv = raw.slice(0,12);
+      const cipher = raw.slice(12);
+      const dec = await crypto.subtle.decrypt({name:"AES-GCM",iv:iv},key,cipher);
+      text = new TextDecoder().decode(dec);
+    }catch{}
 
-    const decodeBtn = document.createElement("button");
-    decodeBtn.textContent="Çöz";
-    decodeBtn.className="decodeBtn";
-    decodeBtn.onclick = async ()=>{
-      try{
-        const key = await getKey(secretKey.value);
-        const raw = b642ab(data.message);
-        const iv = raw.slice(0,12);
-        const cipher = raw.slice(12);
-        const dec = await crypto.subtle.decrypt({name:"AES-GCM",iv:iv},key,cipher);
-        const text = new TextDecoder().decode(dec);
-        const encryptedDiv = div.querySelector(".encrypted");
-        encryptedDiv.textContent = text;
-        encryptedDiv.classList.add("decoded");
-      }catch{
-        alert("Şifre çözülemedi! Anahtar yanlış olabilir.");
-      }
-    };
-    div.appendChild(decodeBtn);
+    div.innerHTML = `<b style="color:${userColor}">${data.user}</b>
+                     <div class="decoded">${text}</div>
+                     <div class="small">${new Date(data.time).toLocaleString()}</div>`;
 
     if(auth.currentUser.email===data.user){
-      const del=document.createElement("button");
+      const del = document.createElement("button");
       del.textContent="Sil";
       del.className="delete";
-      del.onclick=()=>db.ref("rooms/"+currentRoom+"/"+id).remove();
+      del.onclick = ()=> db.ref("rooms/"+currentRoom+"/"+id).remove();
       div.appendChild(del);
     }
 
@@ -300,10 +213,9 @@ room.addEventListener("change",()=>{
   });
 
   db.ref("rooms/"+currentRoom).on("value", snap=>{
-    onlineCount.textContent="Mesaj Sayısı: "+snap.numChildren();
+    onlineCount.textContent = "Mesaj Sayısı: " + snap.numChildren();
   });
 });
 </script>
-
 </body>
 </html>
