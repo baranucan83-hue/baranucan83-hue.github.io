@@ -45,7 +45,7 @@ h1{
   margin-bottom:15px;
   color:#ff6f91;
 }
-input{
+input, select{
   padding:12px;
   border:none;
   border-radius:10px;
@@ -55,7 +55,7 @@ input{
   color:white;
   border:1px solid #ff6f91;
 }
-input:focus{outline:none;border:1px solid #ffd166;}
+input:focus, select:focus{outline:none;border:1px solid #ffd166;}
 button{
   padding:10px;
   border:none;
@@ -134,6 +134,7 @@ button:hover{opacity:0.9; transform: scale(1.05);}
   <div class="online" id="onlineCount"></div>
   <div id="chat"></div>
   <input id="mesaj" placeholder="Mesaj yaz...">
+  <input type="file" id="dosya">
   <button onclick="sendMessage()">Gönder</button>
 </div>
 </div>
@@ -141,6 +142,7 @@ button:hover{opacity:0.9; transform: scale(1.05);}
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 
 <script>
 const firebaseConfig = {
@@ -148,21 +150,22 @@ const firebaseConfig = {
   authDomain: "core-chat-3be96.firebaseapp.com",
   databaseURL: "https://core-chat-3be96-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "core-chat-3be96",
-  storageBucket: "core-chat-3be96.firebasestorage.app",
+  storageBucket: "core-chat-3be96.appspot.com",
   messagingSenderId: "555994455959",
   appId: "1:555994455959:web:9dbd659b1970c491042ed2"
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
+const storage = firebase.storage();
 
 // Login
 function login(){
   if(!nickname.value) return alert("Takma ad boş olamaz!");
   auth.signInWithEmailAndPassword(email.value,password.value)
-  .then(user=>{
+  .then(async user=>{
     const uid = auth.currentUser.uid;
-    db.ref("users/"+uid).set({
+    await db.ref("users/"+uid).set({
       nickname: nickname.value,
       avatar: avatarURL.value || ''
     });
@@ -187,33 +190,54 @@ function escapeHTML(text){ const div = document.createElement('div'); div.textCo
 // Rate limit
 let lastSent = 0;
 
-// Send message
+// Send message or file
 async function sendMessage(){
   const now = Date.now();
   if(now - lastSent < 1000) return alert("1 saniyede bir mesaj gönderebilirsiniz");
   lastSent = now;
-  if(!room.value || !secretKey.value || !mesaj.value) return alert("Alanlar boş olamaz");
+  if(!room.value || !secretKey.value || (!mesaj.value && !dosya.files.length)) return alert("Alanlar boş olamaz");
 
   const key = await getKey(secretKey.value);
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const enc = new TextEncoder();
-  const cipher = await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,enc.encode(mesaj.value));
-  const combined = new Uint8Array(iv.length + cipher.byteLength);
-  combined.set(iv,0);
-  combined.set(new Uint8Array(cipher),iv.length);
+
+  let dataToSend = "";
+  let type = "text";
+  if(dosya.files.length){
+    type="file";
+    const file = dosya.files[0];
+    const arrayBuffer = await file.arrayBuffer();
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const cipher = await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,arrayBuffer);
+    const combined = new Uint8Array(iv.length + cipher.byteLength);
+    combined.set(iv,0);
+    combined.set(new Uint8Array(cipher),iv.length);
+    dataToSend = ab2b64(combined);
+
+    // Save original file name and type
+    dataToSend = JSON.stringify({data:dataToSend,name:file.name,type:file.type});
+  } else {
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const enc = new TextEncoder();
+    const cipher = await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,enc.encode(mesaj.value));
+    const combined = new Uint8Array(iv.length + cipher.byteLength);
+    combined.set(iv,0);
+    combined.set(new Uint8Array(cipher),iv.length);
+    dataToSend = JSON.stringify({data:ab2b64(combined)});
+  }
 
   const userRef = db.ref("users/"+auth.currentUser.uid);
   const userData = (await userRef.get()).val();
 
   db.ref("rooms/"+room.value).push({
-    message: ab2b64(combined),
+    message: dataToSend,
     user: auth.currentUser.email,
     nickname: userData.nickname,
     avatar: userData.avatar || '',
-    time: Date.now()
+    time: Date.now(),
+    type: type
   });
 
   mesaj.value="";
+  dosya.value="";
 }
 
 mesaj.addEventListener("keypress", e=>{if(e.key==="Enter") sendMessage();});
@@ -221,7 +245,7 @@ mesaj.addEventListener("keypress", e=>{if(e.key==="Enter") sendMessage();});
 let currentRoom = null;
 const colors = ["#ff4444","#00ffff","#ffaa00","#00ff00","#ff00ff","#ff6f91"];
 
-// Room change
+// Room change and listening
 room.addEventListener("change",()=>{
   chat.innerHTML="";
   if(currentRoom) db.ref("rooms/"+currentRoom).off();
@@ -239,11 +263,22 @@ room.addEventListener("change",()=>{
     let text="🔒 Mesaj çözülemedi!";
     try{
       const key = await getKey(secretKey.value);
-      const raw = b642ab(data.message);
+      const msgObj = JSON.parse(data.message);
+      const raw = b642ab(msgObj.data);
       const iv = raw.slice(0,12);
       const cipher = raw.slice(12);
-      const dec = await crypto.subtle.decrypt({name:"AES-GCM",iv:iv},key,cipher);
-      text = escapeHTML(new TextDecoder().decode(dec));
+      if(data.type==="file"){
+        const dec = await crypto.subtle.decrypt({name:"AES-GCM",iv:iv},key,cipher);
+        const blob = new Blob([dec], {type: msgObj.type});
+        if(msgObj.type.startsWith("image/")){
+          text = `<img src="${URL.createObjectURL(blob)}" style="max-width:100%;border-radius:10px;">`;
+        } else {
+          text = `<a href="${URL.createObjectURL(blob)}" download="${escapeHTML(msgObj.name)}" style="color:#ffd166;">${escapeHTML(msgObj.name)}</a>`;
+        }
+      } else {
+        const dec = await crypto.subtle.decrypt({name:"AES-GCM",iv:iv},key,cipher);
+        text = escapeHTML(new TextDecoder().decode(dec));
+      }
     }catch{}
 
     const avatarImg = data.avatar ? `<img src="${escapeHTML(data.avatar)}" class="avatar">` : '';
