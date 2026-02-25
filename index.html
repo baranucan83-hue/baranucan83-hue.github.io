@@ -45,7 +45,7 @@ h1{
   margin-bottom:15px;
   color:#ff6f91;
 }
-input, select{
+input{
   padding:12px;
   border:none;
   border-radius:10px;
@@ -55,7 +55,7 @@ input, select{
   color:white;
   border:1px solid #ff6f91;
 }
-input:focus, select:focus{outline:none;border:1px solid #ffd166;}
+input:focus{outline:none;border:1px solid #ffd166;}
 button{
   padding:10px;
   border:none;
@@ -142,9 +142,9 @@ button:hover{opacity:0.9; transform: scale(1.05);}
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 
 <script>
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyB9hBRTJ4BLMLpmAPxwPdbrNbk2UuAV3i4",
   authDomain: "core-chat-3be96.firebaseapp.com",
@@ -157,19 +157,19 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
-const storage = firebase.storage();
 
 // Login
 function login(){
   if(!nickname.value) return alert("Takma ad boş olamaz!");
   auth.signInWithEmailAndPassword(email.value,password.value)
-  .then(async user=>{
+  .then(async ()=>{
     const uid = auth.currentUser.uid;
     await db.ref("users/"+uid).set({
       nickname: nickname.value,
       avatar: avatarURL.value || ''
     });
-    loginBox.style.display="none"; appBox.style.display="flex";
+    loginBox.style.display="none";
+    appBox.style.display="flex";
   })
   .catch(e=>alert(e.message));
 }
@@ -177,14 +177,14 @@ auth.onAuthStateChanged(user=>{
   if(user){loginBox.style.display="none"; appBox.style.display="flex";}
 });
 
-// Encryption
+// Encryption helpers
 async function getKey(password){
   const enc = new TextEncoder();
-  const hash = await crypto.subtle.digest("SHA-256",enc.encode(password));
-  return crypto.subtle.importKey("raw",hash,{name:"AES-GCM"},false,["encrypt","decrypt"]);
+  const hash = await crypto.subtle.digest("SHA-256", enc.encode(password));
+  return crypto.subtle.importKey("raw", hash, {name:"AES-GCM"}, false, ["encrypt","decrypt"]);
 }
 function ab2b64(buffer){ return btoa(String.fromCharCode(...new Uint8Array(buffer))); }
-function b642ab(base64){ return Uint8Array.from(atob(base64),c=>c.charCodeAt(0)); }
+function b642ab(base64){ return Uint8Array.from(atob(base64), c=>c.charCodeAt(0)); }
 function escapeHTML(text){ const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
 
 // Rate limit
@@ -198,11 +198,18 @@ async function sendMessage(){
   if(!room.value || !secretKey.value || (!mesaj.value && !dosya.files.length)) return alert("Alanlar boş olamaz");
 
   const key = await getKey(secretKey.value);
+  let type = dosya.files.length ? "file" : "text";
+  let messageData = {};
 
-  let dataToSend = "";
-  let type = "text";
-  if(dosya.files.length){
-    type="file";
+  if(type==="text"){
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const enc = new TextEncoder();
+    const cipher = await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,enc.encode(mesaj.value));
+    const combined = new Uint8Array(iv.length + cipher.byteLength);
+    combined.set(iv,0);
+    combined.set(new Uint8Array(cipher),iv.length);
+    messageData = {data:ab2b64(combined)};
+  } else {
     const file = dosya.files[0];
     const arrayBuffer = await file.arrayBuffer();
     const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -210,25 +217,14 @@ async function sendMessage(){
     const combined = new Uint8Array(iv.length + cipher.byteLength);
     combined.set(iv,0);
     combined.set(new Uint8Array(cipher),iv.length);
-    dataToSend = ab2b64(combined);
-
-    // Save original file name and type
-    dataToSend = JSON.stringify({data:dataToSend,name:file.name,type:file.type});
-  } else {
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const enc = new TextEncoder();
-    const cipher = await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,enc.encode(mesaj.value));
-    const combined = new Uint8Array(iv.length + cipher.byteLength);
-    combined.set(iv,0);
-    combined.set(new Uint8Array(cipher),iv.length);
-    dataToSend = JSON.stringify({data:ab2b64(combined)});
+    messageData = {data:ab2b64(combined),name:file.name,type:file.type};
   }
 
   const userRef = db.ref("users/"+auth.currentUser.uid);
   const userData = (await userRef.get()).val();
 
   db.ref("rooms/"+room.value).push({
-    message: dataToSend,
+    message: JSON.stringify(messageData),
     user: auth.currentUser.email,
     nickname: userData.nickname,
     avatar: userData.avatar || '',
@@ -236,8 +232,7 @@ async function sendMessage(){
     type: type
   });
 
-  mesaj.value="";
-  dosya.value="";
+  mesaj.value=""; dosya.value="";
 }
 
 mesaj.addEventListener("keypress", e=>{if(e.key==="Enter") sendMessage();});
@@ -245,8 +240,7 @@ mesaj.addEventListener("keypress", e=>{if(e.key==="Enter") sendMessage();});
 let currentRoom = null;
 const colors = ["#ff4444","#00ffff","#ffaa00","#00ff00","#ff00ff","#ff6f91"];
 
-// Room change and listening
-room.addEventListener("change",()=>{
+room.addEventListener("change", ()=>{
   chat.innerHTML="";
   if(currentRoom) db.ref("rooms/"+currentRoom).off();
   currentRoom = room.value;
@@ -264,20 +258,23 @@ room.addEventListener("change",()=>{
     try{
       const key = await getKey(secretKey.value);
       const msgObj = JSON.parse(data.message);
-      const raw = b642ab(msgObj.data);
-      const iv = raw.slice(0,12);
-      const cipher = raw.slice(12);
-      if(data.type==="file"){
+      if(data.type==="text"){
+        const raw = b642ab(msgObj.data);
+        const iv = raw.slice(0,12);
+        const cipher = raw.slice(12);
         const dec = await crypto.subtle.decrypt({name:"AES-GCM",iv:iv},key,cipher);
-        const blob = new Blob([dec], {type: msgObj.type});
+        text = escapeHTML(new TextDecoder().decode(dec));
+      } else {
+        const raw = b642ab(msgObj.data);
+        const iv = raw.slice(0,12);
+        const cipher = raw.slice(12);
+        const dec = await crypto.subtle.decrypt({name:"AES-GCM",iv:iv},key,cipher);
+        const blob = new Blob([dec],{type:msgObj.type});
         if(msgObj.type.startsWith("image/")){
           text = `<img src="${URL.createObjectURL(blob)}" style="max-width:100%;border-radius:10px;">`;
         } else {
           text = `<a href="${URL.createObjectURL(blob)}" download="${escapeHTML(msgObj.name)}" style="color:#ffd166;">${escapeHTML(msgObj.name)}</a>`;
         }
-      } else {
-        const dec = await crypto.subtle.decrypt({name:"AES-GCM",iv:iv},key,cipher);
-        text = escapeHTML(new TextDecoder().decode(dec));
       }
     }catch{}
 
@@ -295,7 +292,7 @@ room.addEventListener("change",()=>{
     }
 
     chat.appendChild(div);
-    chat.scrollTop=chat.scrollHeight;
+    chat.scrollTop = chat.scrollHeight;
   });
 
   db.ref("rooms/"+currentRoom).on("value", snap=>{
