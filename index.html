@@ -7,26 +7,112 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:Inter,sans-serif;height:100vh;display:flex;justify-content:center;align-items:center;background:url('https://source.unsplash.com/1600x900/?technology,abstract') no-repeat center center fixed;background-size:cover;position:relative;color:white}
-body::before{content:"";position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:0}
-.container{position:relative;z-index:1;width:95%;max-width:1200px;height:90vh;background:rgba(0,0,0,0.6);border-radius:15px;padding:20px;display:flex;flex-direction:column;box-shadow:0 0 20px rgba(255,111,145,0.7);}
-h1{font-family:Orbitron;text-align:center;font-size:32px;margin-bottom:15px;color:#ff6f91;}
-input,select{padding:10px;border:none;border-radius:10px;margin:5px 0;width:100%;background:#1c2a38;color:white;border:1px solid #ff6f91;}
-input:focus,select:focus{outline:none;border:1px solid #ffd166;}
-button{padding:10px;border:none;border-radius:10px;margin:5px 0;cursor:pointer;font-weight:bold;background:#ff6f91;color:white;transition:0.2s;}
+body{
+  font-family:Inter,sans-serif;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background: url('https://source.unsplash.com/1600x900/?technology,abstract') no-repeat center center fixed;
+  background-size: cover;
+  position: relative;
+  color:white;
+}
+body::before{
+  content:"";
+  position:absolute;
+  top:0; left:0; right:0; bottom:0;
+  background: rgba(0,0,0,0.5);
+  z-index:0;
+}
+.container{
+  position: relative;
+  z-index:1;
+  width:95%;
+  max-width:900px;
+  height:90vh;
+  background: rgba(0,0,0,0.6);
+  border-radius:15px;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  box-shadow:0 0 20px rgba(255,111,145,0.7);
+}
+h1{
+  font-family:Orbitron;
+  text-align:center;
+  font-size:32px;
+  margin-bottom:15px;
+  color:#ff6f91;
+}
+input{
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  margin:5px 0;
+  width:100%;
+  background:#1c2a38;
+  color:white;
+  border:1px solid #ff6f91;
+}
+input:focus{outline:none;border:1px solid #ffd166;}
+button{
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  margin:5px 0;
+  cursor:pointer;
+  font-weight:bold;
+  background:#ff6f91;
+  color:white;
+  transition:0.2s;
+}
 button:hover{opacity:0.9; transform: scale(1.05);}
-#chat{flex:1;overflow:auto;margin:10px 0;padding:10px;border-radius:10px;background:#203a43cc;}
-.message{padding:10px;margin-bottom:10px;border-radius:10px;background:#30475ecc;display:flex;flex-direction:column;position:relative;transition:0.3s;}
-.message:hover{box-shadow:0 0 15px #ff6f91; transform: scale(1.02);}
+#chat{
+  flex:1;
+  overflow:auto;
+  margin:10px 0;
+  padding:10px;
+  border-radius:10px;
+  background:#203a43cc;
+}
+.message{
+  padding:10px;
+  margin-bottom:10px;
+  border-radius:10px;
+  background:#30475ecc;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+  transition: 0.3s;
+}
+.message:hover{box-shadow: 0 0 15px #ff6f91; transform: scale(1.02);}
 .small{font-size:11px;opacity:0.6;}
-.delete{background:#ff4444;padding:4px 8px;font-size:11px;margin-top:5px;cursor:pointer;border:none;border-radius:5px;}
-.decoded{color:#ffd166;font-weight:bold;}
-.online{font-size:12px;text-align:right;opacity:0.7;margin-bottom:5px;}
-.avatar{width:28px;height:28px;border-radius:50%;margin-right:6px;}
-.userRow{display:flex;align-items:center;}
-.videoPanel{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
-video{width:200px;height:150px;background:#000;border-radius:10px;object-fit:cover;}
-.controls{display:flex;gap:10px;margin-bottom:5px;}
+.delete{
+  background:#ff4444;
+  padding:4px 8px;
+  font-size:11px;
+  margin-top:5px;
+  cursor:pointer;
+  border:none;
+  border-radius:5px;
+}
+.decoded{
+  color:#ffd166;
+  font-weight:bold;
+}
+.online{
+  font-size:12px;
+  text-align:right;
+  opacity:0.7;
+  margin-bottom:5px;
+}
+.avatar{
+  width:28px; height:28px; border-radius:50%; margin-right:6px;
+}
+.userRow{
+  display:flex; align-items:center;
+}
 </style>
 </head>
 <body>
@@ -45,16 +131,11 @@ video{width:200px;height:150px;background:#000;border-radius:10px;object-fit:cov
 <div id="appBox" style="display:none;flex:1;flex-direction:column;">
   <input id="room" placeholder="Oda adı">
   <input id="secretKey" placeholder="Ortak Gizli Anahtar">
-  <div class="controls">
-    <button id="toggleMic">Mikrofon Aç/Kapat</button>
-    <button id="toggleCam">Kamera Aç/Kapat</button>
-  </div>
   <div class="online" id="onlineCount"></div>
   <div id="chat"></div>
   <input id="mesaj" placeholder="Mesaj yaz...">
   <input type="file" id="dosya">
   <button onclick="sendMessage()">Gönder</button>
-  <div class="videoPanel" id="videoPanel"></div>
 </div>
 </div>
 
@@ -63,7 +144,7 @@ video{width:200px;height:150px;background:#000;border-radius:10px;object-fit:cov
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
 <script>
-// Firebase
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyB9hBRTJ4BLMLpmAPxwPdbrNbk2UuAV3i4",
   authDomain: "core-chat-3be96.firebaseapp.com",
@@ -83,13 +164,18 @@ function login(){
   auth.signInWithEmailAndPassword(email.value,password.value)
   .then(async ()=>{
     const uid = auth.currentUser.uid;
-    await db.ref("users/"+uid).set({nickname:nickname.value,avatar:avatarURL.value||''});
-    loginBox.style.display="none"; appBox.style.display="flex";
-    startLocalStream();
-  }).catch(e=>alert(e.message));
+    await db.ref("users/"+uid).set({
+      nickname: nickname.value,
+      avatar: avatarURL.value || ''
+    });
+    loginBox.style.display="none";
+    appBox.style.display="flex";
+  })
+  .catch(e=>alert(e.message));
 }
+
 auth.onAuthStateChanged(user=>{
-  if(user){loginBox.style.display="none"; appBox.style.display="flex"; startLocalStream();}
+  if(user){loginBox.style.display="none"; appBox.style.display="flex";}
 });
 
 // Encryption helpers
@@ -100,114 +186,120 @@ async function getKey(password){
 }
 function ab2b64(buffer){ return btoa(String.fromCharCode(...new Uint8Array(buffer))); }
 function b642ab(base64){ return Uint8Array.from(atob(base64), c=>c.charCodeAt(0)); }
-function escapeHTML(text){ const div = document.createElement('div'); div.textContent=text; return div.innerHTML; }
-let lastSent=0;
+function escapeHTML(text){ const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
 
-// Send chat
+// Rate limit
+let lastSent = 0;
+
+// Send message or file
 async function sendMessage(){
-  const now=Date.now();
-  if(now-lastSent<1000)return alert("1 saniyede bir mesaj gönderebilirsiniz");
-  lastSent=now;
-  if(!room.value||!secretKey.value||(!mesaj.value&&!dosya.files.length)) return alert("Alanlar boş olamaz");
+  const now = Date.now();
+  if(now - lastSent < 1000) return alert("1 saniyede bir mesaj gönderebilirsiniz");
+  lastSent = now;
+  if(!room.value || !secretKey.value || (!mesaj.value && !dosya.files.length)) return alert("Alanlar boş olamaz");
 
   const key = await getKey(secretKey.value);
-  let type = dosya.files.length?"file":"text";
-  let messageData={};
+  let type = dosya.files.length ? "file" : "text";
+  let messageData = {};
 
   if(type==="text"){
-    const iv=crypto.getRandomValues(new Uint8Array(12));
-    const enc=new TextEncoder();
-    const cipher=await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,enc.encode(mesaj.value));
-    const combined=new Uint8Array(iv.length+cipher.byteLength);
-    combined.set(iv,0); combined.set(new Uint8Array(cipher),iv.length);
-    messageData={data:ab2b64(combined)};
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const enc = new TextEncoder();
+    const cipher = await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,enc.encode(mesaj.value));
+    const combined = new Uint8Array(iv.length + cipher.byteLength);
+    combined.set(iv,0);
+    combined.set(new Uint8Array(cipher),iv.length);
+    messageData = {data:ab2b64(combined)};
   } else {
-    const file=dosya.files[0];
-    const arrayBuffer=await file.arrayBuffer();
-    const iv=crypto.getRandomValues(new Uint8Array(12));
-    const cipher=await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,arrayBuffer);
-    const combined=new Uint8Array(iv.length+cipher.byteLength);
-    combined.set(iv,0); combined.set(new Uint8Array(cipher),iv.length);
-    messageData={data:ab2b64(combined),name:file.name,type:file.type};
+    const file = dosya.files[0];
+    const arrayBuffer = await file.arrayBuffer();
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const cipher = await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,arrayBuffer);
+    const combined = new Uint8Array(iv.length + cipher.byteLength);
+    combined.set(iv,0);
+    combined.set(new Uint8Array(cipher),iv.length);
+    messageData = {data:ab2b64(combined),name:file.name,type:file.type};
   }
 
-  const userRef=db.ref("users/"+auth.currentUser.uid);
-  const userData=(await userRef.get()).val();
-  db.ref("rooms/"+room.value).push({message:JSON.stringify(messageData),user:auth.currentUser.email,nickname:userData.nickname,avatar:userData.avatar||'',time:Date.now(),type:type});
+  const userRef = db.ref("users/"+auth.currentUser.uid);
+  const userData = (await userRef.get()).val();
+
+  db.ref("rooms/"+room.value).push({
+    message: JSON.stringify(messageData),
+    user: auth.currentUser.email,
+    nickname: userData.nickname,
+    avatar: userData.avatar || '',
+    time: Date.now(),
+    type: type
+  });
+
   mesaj.value=""; dosya.value="";
 }
 
-mesaj.addEventListener("keypress",e=>{if(e.key==="Enter")sendMessage();});
-let currentRoom=null;
-const colors=["#ff4444","#00ffff","#ffaa00","#00ff00","#ff00ff","#ff6f91"];
+mesaj.addEventListener("keypress", e=>{if(e.key==="Enter") sendMessage();});
 
-room.addEventListener("change",()=>{
+let currentRoom = null;
+const colors = ["#ff4444","#00ffff","#ffaa00","#00ff00","#ff00ff","#ff6f91"];
+
+room.addEventListener("change", ()=>{
   chat.innerHTML="";
   if(currentRoom) db.ref("rooms/"+currentRoom).off();
-  currentRoom=room.value;
+  currentRoom = room.value;
 
-  db.ref("rooms/"+currentRoom).on("child_added",async snap=>{
-    const data=snap.val(); const id=snap.key;
-    const messageRef=db.ref("rooms/"+currentRoom+"/"+id);
-    const div=document.createElement("div"); div.className="message";
-    const userColor=colors[data.nickname.charCodeAt(0)%colors.length];
+  db.ref("rooms/"+currentRoom).on("child_added", async snap=>{
+    const data = snap.val();
+    const id = snap.key;
+    const messageRef = db.ref("rooms/"+currentRoom+"/"+id);
+
+    const div = document.createElement("div");
+    div.className="message";
+    const userColor = colors[data.nickname.charCodeAt(0) % colors.length];
+
     let text="🔒 Mesaj çözülemedi!";
-
     try{
-      const key=await getKey(secretKey.value);
-      const msgObj=JSON.parse(data.message);
+      const key = await getKey(secretKey.value);
+      const msgObj = JSON.parse(data.message);
       if(data.type==="text"){
-        const raw=b642ab(msgObj.data); const iv=raw.slice(0,12); const cipher=raw.slice(12);
-        const dec=await crypto.subtle.decrypt({name:"AES-GCM",iv:iv},key,cipher);
-        text=escapeHTML(new TextDecoder().decode(dec));
+        const raw = b642ab(msgObj.data);
+        const iv = raw.slice(0,12);
+        const cipher = raw.slice(12);
+        const dec = await crypto.subtle.decrypt({name:"AES-GCM",iv:iv},key,cipher);
+        text = escapeHTML(new TextDecoder().decode(dec));
       } else {
-        const raw=b642ab(msgObj.data); const iv=raw.slice(0,12); const cipher=raw.slice(12);
-        const dec=await crypto.subtle.decrypt({name:"AES-GCM",iv:iv},key,cipher);
-        const blob=new Blob([dec],{type:msgObj.type});
-        if(msgObj.type.startsWith("image/")) text=`<img src="${URL.createObjectURL(blob)}" style="max-width:100%;border-radius:10px;">`;
-        else text=`<a href="${URL.createObjectURL(blob)}" download="${escapeHTML(msgObj.name)}" style="color:#ffd166;">${escapeHTML(msgObj.name)}</a>`;
+        const raw = b642ab(msgObj.data);
+        const iv = raw.slice(0,12);
+        const cipher = raw.slice(12);
+        const dec = await crypto.subtle.decrypt({name:"AES-GCM",iv:iv},key,cipher);
+        const blob = new Blob([dec],{type:msgObj.type});
+        if(msgObj.type.startsWith("image/")){
+          text = `<img src="${URL.createObjectURL(blob)}" style="max-width:100%;border-radius:10px;">`;
+        } else {
+          text = `<a href="${URL.createObjectURL(blob)}" download="${escapeHTML(msgObj.name)}" style="color:#ffd166;">${escapeHTML(msgObj.name)}</a>`;
+        }
       }
     }catch{}
 
-    const avatarImg=data.avatar?`<img src="${escapeHTML(data.avatar)}" class="avatar">`:'';
-    div.innerHTML=`<div class="userRow">${avatarImg}<b style="color:${userColor}">${escapeHTML(data.nickname)}</b></div>
-                   <div class="decoded">${text}</div>
-                   <div class="small">${new Date(data.time).toLocaleString()}</div>`;
+    const avatarImg = data.avatar ? `<img src="${escapeHTML(data.avatar)}" class="avatar">` : '';
+    div.innerHTML = `<div class="userRow">${avatarImg}<b style="color:${userColor}">${escapeHTML(data.nickname)}</b></div>
+                     <div class="decoded">${text}</div>
+                     <div class="small">${new Date(data.time).toLocaleString()}</div>`;
 
     if(auth.currentUser.email===data.user){
-      const del=document.createElement("button"); del.textContent="Sil"; del.className="delete";
-      del.onclick=()=>{messageRef.remove().catch(err=>alert("Silme hatası:"+err.message));};
+      const del = document.createElement("button");
+      del.textContent="Sil";
+      del.className="delete";
+      del.onclick = ()=> { messageRef.remove().catch(err=>alert("Silme hatası: "+err.message)); };
       div.appendChild(del);
     }
-    chat.appendChild(div); chat.scrollTop=chat.scrollHeight;
+
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
   });
 
-  db.ref("rooms/"+currentRoom).on("value",snap=>{onlineCount.textContent="Mesaj Sayısı: "+snap.numChildren();});
+  db.ref("rooms/"+currentRoom).on("value", snap=>{
+    onlineCount.textContent = "Mesaj Sayısı: " + snap.numChildren();
+  });
 });
-
-// --- WebRTC Video/Ses ---
-let localStream=null; const peers={};
-const videoPanel=document.getElementById("videoPanel");
-
-async function startLocalStream(){
-  try{
-    localStream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
-    addVideoStream(localStream,"Ben");
-  }catch(err){console.error("Kamera/Mikrofon hatası",err);}
-}
-
-function addVideoStream(stream,label){
-  const vid=document.createElement("video"); vid.srcObject=stream; vid.autoplay=true; vid.playsInline=true;
-  const container=document.createElement("div"); container.appendChild(vid);
-  const lbl=document.createElement("div"); lbl.textContent=label; lbl.style.color="#ffd166"; lbl.style.fontSize="12px"; container.appendChild(lbl);
-  videoPanel.appendChild(container);
-}
-
-// Mikrofon/Kamera kontrol
-document.getElementById("toggleMic").onclick=()=>{if(localStream) {localStream.getAudioTracks()[0].enabled=!localStream.getAudioTracks()[0].enabled;}};
-document.getElementById("toggleCam").onclick=()=>{if(localStream){localStream.getVideoTracks()[0].enabled=!localStream.getVideoTracks()[0].enabled;}};
-
-// **Not:** WebRTC peer bağlantısı ve sinyalizasyon Firebase üzerinden yapılabilir, burada basit demo olarak sadece kendi video gösteriliyor.
 </script>
 </body>
 </html>
