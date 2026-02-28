@@ -82,102 +82,132 @@ function login(){
   if(!nickname.value) return alert("Takma ad boş olamaz!");
   auth.signInWithEmailAndPassword(email.value,password.value)
   .then(async ()=>{
-    const uid=auth.currentUser.uid;
+    const uid = auth.currentUser.uid;
     await db.ref("users/"+uid).set({nickname:nickname.value,avatar:avatarURL.value||''});
     loginBox.style.display="none"; appBox.style.display="flex";
     startLocalStream();
   }).catch(e=>alert(e.message));
 }
-auth.onAuthStateChanged(user=>{if(user){loginBox.style.display="none";appBox.style.display="flex";startLocalStream();}});
+auth.onAuthStateChanged(user=>{
+  if(user){loginBox.style.display="none"; appBox.style.display="flex"; startLocalStream();}
+});
 
-// --- Chat kısmı aynen önceki sürüm ---
-// (AES şifreli text ve dosya chat kodları buraya aynen kopyalanabilir)
+// Encryption helpers
+async function getKey(password){
+  const enc = new TextEncoder();
+  const hash = await crypto.subtle.digest("SHA-256", enc.encode(password));
+  return crypto.subtle.importKey("raw", hash, {name:"AES-GCM"}, false, ["encrypt","decrypt"]);
+}
+function ab2b64(buffer){ return btoa(String.fromCharCode(...new Uint8Array(buffer))); }
+function b642ab(base64){ return Uint8Array.from(atob(base64), c=>c.charCodeAt(0)); }
+function escapeHTML(text){ const div = document.createElement('div'); div.textContent=text; return div.innerHTML; }
 let lastSent=0;
-async function getKey(password){const enc=new TextEncoder();const hash=await crypto.subtle.digest("SHA-256",enc.encode(password));return crypto.subtle.importKey("raw",hash,{name:"AES-GCM"},false,["encrypt","decrypt"]);}
-function ab2b64(buffer){return btoa(String.fromCharCode(...new Uint8Array(buffer)));}
-function b642ab(base64){return Uint8Array.from(atob(base64),c=>c.charCodeAt(0));}
-function escapeHTML(text){const div=document.createElement('div');div.textContent=text;return div.innerHTML;}
 
-// --- WebRTC Video/Audio ---
-let localStream=null;
-const peers={}; // uid -> RTCPeerConnection
-const videoPanel=document.getElementById("videoPanel");
+// Send chat
+async function sendMessage(){
+  const now=Date.now();
+  if(now-lastSent<1000)return alert("1 saniyede bir mesaj gönderebilirsiniz");
+  lastSent=now;
+  if(!room.value||!secretKey.value||(!mesaj.value&&!dosya.files.length)) return alert("Alanlar boş olamaz");
+
+  const key = await getKey(secretKey.value);
+  let type = dosya.files.length?"file":"text";
+  let messageData={};
+
+  if(type==="text"){
+    const iv=crypto.getRandomValues(new Uint8Array(12));
+    const enc=new TextEncoder();
+    const cipher=await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,enc.encode(mesaj.value));
+    const combined=new Uint8Array(iv.length+cipher.byteLength);
+    combined.set(iv,0); combined.set(new Uint8Array(cipher),iv.length);
+    messageData={data:ab2b64(combined)};
+  } else {
+    const file=dosya.files[0];
+    const arrayBuffer=await file.arrayBuffer();
+    const iv=crypto.getRandomValues(new Uint8Array(12));
+    const cipher=await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,arrayBuffer);
+    const combined=new Uint8Array(iv.length+cipher.byteLength);
+    combined.set(iv,0); combined.set(new Uint8Array(cipher),iv.length);
+    messageData={data:ab2b64(combined),name:file.name,type:file.type};
+  }
+
+  const userRef=db.ref("users/"+auth.currentUser.uid);
+  const userData=(await userRef.get()).val();
+  db.ref("rooms/"+room.value).push({message:JSON.stringify(messageData),user:auth.currentUser.email,nickname:userData.nickname,avatar:userData.avatar||'',time:Date.now(),type:type});
+  mesaj.value=""; dosya.value="";
+}
+
+mesaj.addEventListener("keypress",e=>{if(e.key==="Enter")sendMessage();});
 let currentRoom=null;
+const colors=["#ff4444","#00ffff","#ffaa00","#00ff00","#ff00ff","#ff6f91"];
+
+room.addEventListener("change",()=>{
+  chat.innerHTML="";
+  if(currentRoom) db.ref("rooms/"+currentRoom).off();
+  currentRoom=room.value;
+
+  db.ref("rooms/"+currentRoom).on("child_added",async snap=>{
+    const data=snap.val(); const id=snap.key;
+    const messageRef=db.ref("rooms/"+currentRoom+"/"+id);
+    const div=document.createElement("div"); div.className="message";
+    const userColor=colors[data.nickname.charCodeAt(0)%colors.length];
+    let text="🔒 Mesaj çözülemedi!";
+
+    try{
+      const key=await getKey(secretKey.value);
+      const msgObj=JSON.parse(data.message);
+      if(data.type==="text"){
+        const raw=b642ab(msgObj.data); const iv=raw.slice(0,12); const cipher=raw.slice(12);
+        const dec=await crypto.subtle.decrypt({name:"AES-GCM",iv:iv},key,cipher);
+        text=escapeHTML(new TextDecoder().decode(dec));
+      } else {
+        const raw=b642ab(msgObj.data); const iv=raw.slice(0,12); const cipher=raw.slice(12);
+        const dec=await crypto.subtle.decrypt({name:"AES-GCM",iv:iv},key,cipher);
+        const blob=new Blob([dec],{type:msgObj.type});
+        if(msgObj.type.startsWith("image/")) text=`<img src="${URL.createObjectURL(blob)}" style="max-width:100%;border-radius:10px;">`;
+        else text=`<a href="${URL.createObjectURL(blob)}" download="${escapeHTML(msgObj.name)}" style="color:#ffd166;">${escapeHTML(msgObj.name)}</a>`;
+      }
+    }catch{}
+
+    const avatarImg=data.avatar?`<img src="${escapeHTML(data.avatar)}" class="avatar">`:'';
+    div.innerHTML=`<div class="userRow">${avatarImg}<b style="color:${userColor}">${escapeHTML(data.nickname)}</b></div>
+                   <div class="decoded">${text}</div>
+                   <div class="small">${new Date(data.time).toLocaleString()}</div>`;
+
+    if(auth.currentUser.email===data.user){
+      const del=document.createElement("button"); del.textContent="Sil"; del.className="delete";
+      del.onclick=()=>{messageRef.remove().catch(err=>alert("Silme hatası:"+err.message));};
+      div.appendChild(del);
+    }
+    chat.appendChild(div); chat.scrollTop=chat.scrollHeight;
+  });
+
+  db.ref("rooms/"+currentRoom).on("value",snap=>{onlineCount.textContent="Mesaj Sayısı: "+snap.numChildren();});
+});
+
+// --- WebRTC Video/Ses ---
+let localStream=null; const peers={};
+const videoPanel=document.getElementById("videoPanel");
 
 async function startLocalStream(){
   try{
     localStream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
     addVideoStream(localStream,"Ben");
-    if(room.value) joinRoom(room.value);
-  }catch(err){console.error(err);}
+  }catch(err){console.error("Kamera/Mikrofon hatası",err);}
 }
 
 function addVideoStream(stream,label){
-  const vid=document.createElement("video");
-  vid.srcObject=stream; vid.autoplay=true; vid.playsInline=true;
-  const container=document.createElement("div");
-  container.appendChild(vid);
-  const lbl=document.createElement("div");
-  lbl.textContent=label; lbl.style.color="#ffd166"; lbl.style.fontSize="12px";
-  container.appendChild(lbl);
+  const vid=document.createElement("video"); vid.srcObject=stream; vid.autoplay=true; vid.playsInline=true;
+  const container=document.createElement("div"); container.appendChild(vid);
+  const lbl=document.createElement("div"); lbl.textContent=label; lbl.style.color="#ffd166"; lbl.style.fontSize="12px"; container.appendChild(lbl);
   videoPanel.appendChild(container);
 }
 
-// Mic / Cam toggle
-document.getElementById("toggleMic").onclick=()=>{if(localStream)localStream.getAudioTracks()[0].enabled=!localStream.getAudioTracks()[0].enabled;}
-document.getElementById("toggleCam").onclick=()=>{if(localStream)localStream.getVideoTracks()[0].enabled=!localStream.getVideoTracks()[0].enabled;}
+// Mikrofon/Kamera kontrol
+document.getElementById("toggleMic").onclick=()=>{if(localStream) {localStream.getAudioTracks()[0].enabled=!localStream.getAudioTracks()[0].enabled;}};
+document.getElementById("toggleCam").onclick=()=>{if(localStream){localStream.getVideoTracks()[0].enabled=!localStream.getVideoTracks()[0].enabled;}};
 
-// Join room for WebRTC
-function joinRoom(roomName){
-  if(currentRoom) db.ref("roomsRTC/"+currentRoom).off();
-  currentRoom=roomName;
-  const myUid=auth.currentUser.uid;
-  const rtcRef=db.ref("roomsRTC/"+roomName);
-
-  rtcRef.on("child_added",async snap=>{
-    const data=snap.val();
-    const sender=data.uid;
-    if(sender===myUid) return;
-    if(!peers[sender]) createPeer(sender,false);
-    const peer=peers[sender];
-    if(data.offer && !peer.remoteDescription){
-      await peer.setRemoteDescription(new RTCSessionDescription(data.offer));
-      const answer=await peer.createAnswer();
-      await peer.setLocalDescription(answer);
-      rtcRef.push({uid:myUid,answer:answer});
-    }
-    if(data.answer && peer && !peer.remoteDescription){
-      await peer.setRemoteDescription(new RTCSessionDescription(data.answer));
-    }
-    if(data.candidate && peer){
-      try{await peer.addIceCandidate(new RTCIceCandidate(data.candidate));}catch(e){console.error(e);}
-    }
-  });
-
-  // Notify others
-  rtcRef.once("value",snap=>{
-    Object.keys(snap.val()||{}).forEach(k=>{
-      const u=snap.val()[k].uid;
-      if(u!==myUid && !peers[u]) createPeer(u,true);
-    });
-  });
-}
-
-function createPeer(uid,isInitiator){
-  const pc=new RTCPeerConnection({iceServers:[{urls:"stun:stun.l.google.com:19302"}]});
-  peers[uid]=pc;
-  localStream.getTracks().forEach(track=>pc.addTrack(track,localStream));
-
-  pc.ontrack=e=>{addVideoStream(e.streams[0],"Diğer");};
-  pc.onicecandidate=e=>{if(e.candidate)db.ref("roomsRTC/"+currentRoom).push({uid:auth.currentUser.uid,candidate:e.candidate});};
-
-  if(isInitiator){
-    pc.createOffer().then(offer=>{
-      pc.setLocalDescription(offer);
-      db.ref("roomsRTC/"+currentRoom).push({uid:auth.currentUser.uid,offer:offer});
-    });
-  }
-}
+// **Not:** WebRTC peer bağlantısı ve sinyalizasyon Firebase üzerinden yapılabilir, burada basit demo olarak sadece kendi video gösteriliyor.
 </script>
 </body>
 </html>
