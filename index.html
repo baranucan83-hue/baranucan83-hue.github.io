@@ -36,7 +36,7 @@ video{width:50%;border-radius:15px;background:black;}
 <div id="loginOverlay">
   <h2>SecureCore Aktivasyon</h2>
   <input id="activationCode" placeholder="Aktivasyon Kodunu Gir">
-  <button onclick="checkActivation()">Giriş Yap</button>
+  <button id="loginBtn">Giriş Yap</button>
 </div>
 
 <div class="container" id="mainContainer" style="display:none;">
@@ -52,7 +52,7 @@ video{width:50%;border-radius:15px;background:black;}
 
 <div class="inputArea">
   <input id="mesaj" placeholder="Mesaj yaz...">
-  <button onclick="sendMessage()">Gönder</button>
+  <button id="sendBtn">Gönder</button>
 </div>
 
 <div class="videoArea">
@@ -61,11 +61,11 @@ video{width:50%;border-radius:15px;background:black;}
 </div>
 
 <div class="callButtons">
-  <button onclick="startCall()">Arama Başlat</button>
-  <button onclick="joinCall()">Katıl</button>
-  <button onclick="endCall()">Bitir</button>
-  <button onclick="toggleMic()">Mic</button>
-  <button onclick="toggleCam()">Cam</button>
+  <button id="startCallBtn">Arama Başlat</button>
+  <button id="joinCallBtn">Katıl</button>
+  <button id="endCallBtn">Bitir</button>
+  <button id="toggleMicBtn">Mic</button>
+  <button id="toggleCamBtn">Cam</button>
 </div>
 </div>
 
@@ -73,7 +73,9 @@ video{width:50%;border-radius:15px;background:black;}
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
 <script>
-// Firebase config
+document.addEventListener("DOMContentLoaded",()=>{
+
+// Firebase
 const firebaseConfig={
   apiKey:"AIzaSyB9hBRTJ4BLMLpmAPxwPdbrNbk2UuAV3i4",
   authDomain:"core-chat-3be96.firebaseapp.com",
@@ -83,7 +85,7 @@ const firebaseConfig={
 firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
 
-// DOM Elements
+// DOM
 const username = document.getElementById("username");
 const room = document.getElementById("room");
 const secretKey = document.getElementById("secretKey");
@@ -94,141 +96,87 @@ const remoteVideo = document.getElementById("remoteVideo");
 const loginOverlay = document.getElementById("loginOverlay");
 const activationCode = document.getElementById("activationCode");
 const mainContainer = document.getElementById("mainContainer");
+const loginBtn = document.getElementById("loginBtn");
+const sendBtn = document.getElementById("sendBtn");
+const startCallBtn = document.getElementById("startCallBtn");
+const joinCallBtn = document.getElementById("joinCallBtn");
+const endCallBtn = document.getElementById("endCallBtn");
+const toggleMicBtn = document.getElementById("toggleMicBtn");
+const toggleCamBtn = document.getElementById("toggleCamBtn");
 
-// Aktivasyon kontrolü
-const ACTIVATION_SECRET = "SECURE2026";
-function checkActivation(){
+// Aktivasyon
+const ACTIVATION_SECRET="SECURE2026";
+loginBtn.addEventListener("click",()=>{
   if(activationCode.value === ACTIVATION_SECRET){
     loginOverlay.style.display="none";
     mainContainer.style.display="flex";
   }else{
     alert("Aktivasyon kodu yanlış!");
   }
-}
+});
 
 // Kullanıcı ID
 let myId = localStorage.getItem("myId");
-if(!myId){
-  myId = "user_"+Math.random().toString(36).substring(2,9);
-  localStorage.setItem("myId",myId);
-}
+if(!myId){myId="user_"+Math.random().toString(36).substring(2,9); localStorage.setItem("myId",myId);}
 
-// AES-GCM helper
-async function getKey(password){
-  const enc=new TextEncoder();
-  const hash=await crypto.subtle.digest("SHA-256",enc.encode(password));
-  return crypto.subtle.importKey("raw",hash,{name:"AES-GCM"},false,["encrypt","decrypt"]);
-}
+// AES-GCM
+async function getKey(password){const enc=new TextEncoder(); const hash=await crypto.subtle.digest("SHA-256",enc.encode(password)); return crypto.subtle.importKey("raw",hash,{name:"AES-GCM"},false,["encrypt","decrypt"]);}
 function ab2b64(buffer){return btoa(String.fromCharCode(...new Uint8Array(buffer)));}
 function b642ab(base64){return Uint8Array.from(atob(base64),c=>c.charCodeAt(0));}
 
 // Mesaj Gönder
-async function sendMessage(){
+sendBtn.addEventListener("click",async ()=>{
   if(!room.value||!secretKey.value||!mesaj.value||!username.value) return;
-  const key = await getKey(secretKey.value);
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const cipher = await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,new TextEncoder().encode(mesaj.value));
-  const combined = new Uint8Array(iv.length+cipher.byteLength);
+  const key=await getKey(secretKey.value);
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const cipher=await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,new TextEncoder().encode(mesaj.value));
+  const combined=new Uint8Array(iv.length+cipher.byteLength);
   combined.set(iv,0); combined.set(new Uint8Array(cipher),iv.length);
-  db.ref("rooms/"+room.value).push({
-    message:ab2b64(combined),
-    time:Date.now(),
-    sender:myId,
-    name:username.value
-  });
+  db.ref("rooms/"+room.value).push({message:ab2b64(combined),time:Date.now(),sender:myId,name:username.value});
   mesaj.value="";
-}
+});
 
-// Mesajları dinle
+// Mesaj Dinle
 function listenMessages(){
-  db.ref("rooms/"+room.value).off();
-  chat.innerHTML="";
+  db.ref("rooms/"+room.value).off(); chat.innerHTML="";
   db.ref("rooms/"+room.value).on("child_added",async snap=>{
     const data=snap.val();
     try{
       const key=await getKey(secretKey.value);
-      const raw=b642ab(data.message);
-      const iv=raw.slice(0,12);
-      const cipher=raw.slice(12);
+      const raw=b642ab(data.message); const iv=raw.slice(0,12); const cipher=raw.slice(12);
       const dec=await crypto.subtle.decrypt({name:"AES-GCM",iv:iv},key,cipher);
       const text=new TextDecoder().decode(dec);
-
-      const div=document.createElement("div");
-      const isMe = data.sender === myId;
+      const div=document.createElement("div"); const isMe=data.sender===myId;
       div.className="message "+(isMe?"right":"left");
-      div.innerHTML=`
-        <div class="username">${data.name}</div>
-        ${text}
-        <div class="timestamp">${new Date(data.time).toLocaleTimeString()}</div>
-      `;
-      chat.appendChild(div);
-      chat.scrollTop=chat.scrollHeight;
-    }catch(err){
-      console.error("Mesaj çözümlenemedi",err);
-    }
+      div.innerHTML=`<div class="username">${data.name}</div>${text}<div class="timestamp">${new Date(data.time).toLocaleTimeString()}</div>`;
+      chat.appendChild(div); chat.scrollTop=chat.scrollHeight;
+    }catch(err){console.error("Mesaj çözümlenemedi",err);}
   });
 }
 
-room.addEventListener("input",listenMessages);
+// Dinleme join butonuna
+room.addEventListener("change",listenMessages);
 
 // WebRTC
 let localStream; let peerConnection;
 const servers={iceServers:[{urls:"stun:stun.l.google.com:19302"}]};
-async function initMedia(){
-  try{
-    localStream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
-    localVideo.srcObject=localStream;
-  }catch(err){
-    alert("Kamera veya mikrofon erişimi reddedildi!");
-  }
-}
+async function initMedia(){try{localStream=await navigator.mediaDevices.getUserMedia({video:true,audio:true}); localVideo.srcObject=localStream;}catch(err){alert("Kamera veya mikrofon erişimi reddedildi!");}}
 async function createPeer(){
   peerConnection=new RTCPeerConnection(servers);
   localStream.getTracks().forEach(track=>peerConnection.addTrack(track,localStream));
   peerConnection.ontrack=e=>{remoteVideo.srcObject=e.streams[0];};
-  peerConnection.onicecandidate=e=>{
-    if(e.candidate) db.ref("calls/"+room.value+"/candidates").push(e.candidate.toJSON());
-  };
+  peerConnection.onicecandidate=e=>{if(e.candidate) db.ref("calls/"+room.value+"/candidates").push(e.candidate.toJSON());};
   db.ref("calls/"+room.value+"/candidates").off();
-  db.ref("calls/"+room.value+"/candidates").on("child_added",snap=>{
-    if(peerConnection) peerConnection.addIceCandidate(new RTCIceCandidate(snap.val()));
-  });
+  db.ref("calls/"+room.value+"/candidates").on("child_added",snap=>{if(peerConnection) peerConnection.addIceCandidate(new RTCIceCandidate(snap.val()));});
 }
 
-async function startCall(){
-  await initMedia();
-  await createPeer();
-  const offer=await peerConnection.createOffer();
-  await peerConnection.setLocalDescription(offer);
-  await db.ref("calls/"+room.value+"/offer").set(offer);
-  db.ref("calls/"+room.value+"/answer").on("value",async snap=>{
-    const answer=snap.val();
-    if(answer) await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-  });
-}
+startCallBtn.addEventListener("click",async ()=>{await initMedia(); await createPeer(); const offer=await peerConnection.createOffer(); await peerConnection.setLocalDescription(offer); await db.ref("calls/"+room.value+"/offer").set(offer); db.ref("calls/"+room.value+"/answer").on("value",async snap=>{const answer=snap.val(); if(answer) await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));});});
+joinCallBtn.addEventListener("click",async ()=>{await initMedia(); await createPeer(); const offerSnap=await db.ref("calls/"+room.value+"/offer").get(); const offer=offerSnap.val(); if(!offer) return alert("Oda teklifi bulunamadı!"); await peerConnection.setRemoteDescription(new RTCSessionDescription(offer)); const answer=await peerConnection.createAnswer(); await peerConnection.setLocalDescription(answer); await db.ref("calls/"+room.value+"/answer").set(answer);});
+endCallBtn.addEventListener("click",()=>{if(peerConnection) peerConnection.close(); if(localStream)localStream.getTracks().forEach(t=>t.stop()); localVideo.srcObject=null; remoteVideo.srcObject=null; db.ref("calls/"+room.value).remove();});
+toggleMicBtn.addEventListener("click",()=>{if(localStream)localStream.getAudioTracks()[0].enabled=!localStream.getAudioTracks()[0].enabled;});
+toggleCamBtn.addEventListener("click",()=>{if(localStream)localStream.getVideoTracks()[0].enabled=!localStream.getVideoTracks()[0].enabled;});
 
-async function joinCall(){
-  await initMedia();
-  await createPeer();
-  const offerSnap=await db.ref("calls/"+room.value+"/offer").get();
-  const offer=offerSnap.val();
-  if(!offer) return alert("Oda teklifi bulunamadı!");
-  await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-  const answer=await peerConnection.createAnswer();
-  await peerConnection.setLocalDescription(answer);
-  await db.ref("calls/"+room.value+"/answer").set(answer);
-}
-
-function endCall(){
-  if(peerConnection) peerConnection.close();
-  if(localStream) localStream.getTracks().forEach(t=>t.stop());
-  localVideo.srcObject=null; remoteVideo.srcObject=null;
-  db.ref("calls/"+room.value).remove();
-}
-
-function toggleMic(){if(localStream)localStream.getAudioTracks()[0].enabled=!localStream.getAudioTracks()[0].enabled;}
-function toggleCam(){if(localStream)localStream.getVideoTracks()[0].enabled=!localStream.getVideoTracks()[0].enabled;}
+});
 </script>
-
 </body>
 </html>
