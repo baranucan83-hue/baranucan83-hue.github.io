@@ -75,7 +75,7 @@ video{width:50%;border-radius:15px;background:black;}
 <script>
 document.addEventListener("DOMContentLoaded",()=>{
 
-// Firebase
+// Firebase config
 const firebaseConfig={
   apiKey:"AIzaSyB9hBRTJ4BLMLpmAPxwPdbrNbk2UuAV3i4",
   authDomain:"core-chat-3be96.firebaseapp.com",
@@ -85,24 +85,24 @@ const firebaseConfig={
 firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
 
-// DOM
-const username = document.getElementById("username");
-const room = document.getElementById("room");
-const secretKey = document.getElementById("secretKey");
-const mesaj = document.getElementById("mesaj");
-const chat = document.getElementById("chat");
-const localVideo = document.getElementById("localVideo");
-const remoteVideo = document.getElementById("remoteVideo");
-const loginOverlay = document.getElementById("loginOverlay");
-const activationCode = document.getElementById("activationCode");
-const mainContainer = document.getElementById("mainContainer");
-const loginBtn = document.getElementById("loginBtn");
-const sendBtn = document.getElementById("sendBtn");
-const startCallBtn = document.getElementById("startCallBtn");
-const joinCallBtn = document.getElementById("joinCallBtn");
-const endCallBtn = document.getElementById("endCallBtn");
-const toggleMicBtn = document.getElementById("toggleMicBtn");
-const toggleCamBtn = document.getElementById("toggleCamBtn");
+// DOM Elements
+const username=document.getElementById("username");
+const room=document.getElementById("room");
+const secretKey=document.getElementById("secretKey");
+const mesaj=document.getElementById("mesaj");
+const chat=document.getElementById("chat");
+const localVideo=document.getElementById("localVideo");
+const remoteVideo=document.getElementById("remoteVideo");
+const loginOverlay=document.getElementById("loginOverlay");
+const activationCode=document.getElementById("activationCode");
+const mainContainer=document.getElementById("mainContainer");
+const loginBtn=document.getElementById("loginBtn");
+const sendBtn=document.getElementById("sendBtn");
+const startCallBtn=document.getElementById("startCallBtn");
+const joinCallBtn=document.getElementById("joinCallBtn");
+const endCallBtn=document.getElementById("endCallBtn");
+const toggleMicBtn=document.getElementById("toggleMicBtn");
+const toggleCamBtn=document.getElementById("toggleCamBtn");
 
 // Aktivasyon
 const ACTIVATION_SECRET="SECURE2026";
@@ -153,8 +153,6 @@ function listenMessages(){
     }catch(err){console.error("Mesaj çözümlenemedi",err);}
   });
 }
-
-// Dinleme join butonuna
 room.addEventListener("change",listenMessages);
 
 // WebRTC
@@ -178,5 +176,6 @@ toggleCamBtn.addEventListener("click",()=>{if(localStream)localStream.getVideoTr
 
 });
 </script>
+
 </body>
 </html>
