@@ -4,169 +4,42 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SecureCore X</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-
-body{
-  font-family:Inter,sans-serif;
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-  color:white;
-}
-
-.container{
-  width:95%;
-  max-width:1100px;
-  height:95vh;
-  background:rgba(255,255,255,0.05);
-  backdrop-filter:blur(25px);
-  border-radius:20px;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-  box-shadow:0 20px 60px rgba(0,0,0,0.7);
-}
-
-header{
-  padding:15px;
-  text-align:center;
-  font-family:Orbitron;
-  font-size:20px;
-  color:#00f5ff;
-  background:rgba(0,0,0,0.3);
-}
-
-.topInputs{
-  display:flex;
-  gap:10px;
-  padding:10px;
-  flex-wrap:wrap;
-}
-
-.topInputs input{
-  flex:1;
-  padding:10px;
-  border:none;
-  border-radius:12px;
-  background:#1c2a38;
-  color:white;
-}
-
-#chat{
-  flex:1;
-  overflow-y:auto;
-  padding:15px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
-.message{
-  max-width:70%;
-  padding:12px 16px;
-  border-radius:20px;
-  font-size:14px;
-  animation:fadeIn .2s ease;
-}
-
-.left{
-  align-self:flex-start;
-  background:linear-gradient(135deg,#1f1f1f,#2b2b2b);
-  border-bottom-left-radius:5px;
-}
-
-.right{
-  align-self:flex-end;
-  background:linear-gradient(135deg,#00f5ff,#00bcd4);
-  color:black;
-  border-bottom-right-radius:5px;
-}
-
-.username{
-  font-size:11px;
-  font-weight:600;
-  opacity:0.8;
-  margin-bottom:4px;
-}
-
-.timestamp{
-  font-size:10px;
-  opacity:0.6;
-  margin-top:4px;
-  text-align:right;
-}
-
-.inputArea{
-  display:flex;
-  gap:10px;
-  padding:10px;
-  background:rgba(0,0,0,0.4);
-}
-
-.inputArea input{
-  flex:1;
-  padding:12px;
-  border:none;
-  border-radius:15px;
-  background:#1c2a38;
-  color:white;
-}
-
-.inputArea button{
-  padding:10px 15px;
-  border:none;
-  border-radius:15px;
-  background:#00f5ff;
-  color:black;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-.videoArea{
-  display:flex;
-  gap:10px;
-  padding:10px;
-}
-
-video{
-  width:50%;
-  border-radius:15px;
-  background:black;
-}
-
-.callButtons{
-  display:flex;
-  gap:10px;
-  padding:10px;
-  justify-content:center;
-  flex-wrap:wrap;
-}
-
-.callButtons button{
-  padding:8px 15px;
-  border:none;
-  border-radius:12px;
-  background:#00f5ff;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-@keyframes fadeIn{
-  from{opacity:0;transform:translateY(10px);}
-  to{opacity:1;transform:translateY(0);}
-}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:Inter,sans-serif;height:100vh;display:flex;justify-content:center;align-items:center;background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);color:white;}
+.container{width:95%;max-width:1100px;height:95vh;background:rgba(255,255,255,0.05);backdrop-filter:blur(25px);border-radius:20px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.7);}
+header{padding:15px;text-align:center;font-family:Orbitron;font-size:20px;color:#00f5ff;background:rgba(0,0,0,0.3);}
+.topInputs{display:flex;gap:10px;padding:10px;flex-wrap:wrap;}
+.topInputs input{flex:1;min-width:150px;padding:10px;border:none;border-radius:12px;background:#1c2a38;color:white;}
+#chat{flex:1;overflow-y:auto;padding:15px;display:flex;flex-direction:column;gap:10px;}
+.message{max-width:70%;padding:12px 16px;border-radius:20px;font-size:14px;animation:fadeIn .2s ease;}
+.left{align-self:flex-start;background:linear-gradient(135deg,#1f1f1f,#2b2b2b);border-bottom-left-radius:5px;}
+.right{align-self:flex-end;background:linear-gradient(135deg,#00f5ff,#00bcd4);color:black;border-bottom-right-radius:5px;}
+.username{font-size:11px;font-weight:600;opacity:0.8;margin-bottom:4px;}
+.timestamp{font-size:10px;opacity:0.6;margin-top:4px;text-align:right;}
+.inputArea{display:flex;gap:10px;padding:10px;background:rgba(0,0,0,0.4);}
+.inputArea input{flex:1;padding:12px;border:none;border-radius:15px;background:#1c2a38;color:white;}
+.inputArea button{padding:10px 15px;border:none;border-radius:15px;background:#00f5ff;color:black;font-weight:bold;cursor:pointer;}
+.videoArea{display:flex;gap:10px;padding:10px;}
+video{width:50%;border-radius:15px;background:black;}
+.callButtons{display:flex;gap:10px;padding:10px;justify-content:center;flex-wrap:wrap;}
+.callButtons button{padding:8px 15px;border:none;border-radius:12px;background:#00f5ff;font-weight:bold;cursor:pointer;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+#loginOverlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:10;}
+#loginOverlay input{padding:15px 20px;border-radius:15px;border:none;margin-bottom:10px;width:250px;text-align:center;}
+#loginOverlay button{padding:10px 20px;border-radius:12px;border:none;background:#00f5ff;color:black;font-weight:bold;cursor:pointer;}
 </style>
 </head>
 <body>
 
-<div class="container">
+<div id="loginOverlay">
+  <h2>SecureCore Aktivasyon</h2>
+  <input id="activationCode" placeholder="Aktivasyon Kodunu Gir">
+  <button onclick="checkActivation()">Giriş Yap</button>
+</div>
 
+<div class="container" id="mainContainer" style="display:none;">
 <header>SecureCore X ⚡</header>
 
 <div class="topInputs">
@@ -194,72 +67,82 @@ video{
   <button onclick="toggleMic()">Mic</button>
   <button onclick="toggleCam()">Cam</button>
 </div>
-
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
 <script>
+// Firebase config
 const firebaseConfig={
   apiKey:"AIzaSyB9hBRTJ4BLMLpmAPxwPdbrNbk2UuAV3i4",
   authDomain:"core-chat-3be96.firebaseapp.com",
   databaseURL:"https://core-chat-3be96-default-rtdb.europe-west1.firebasedatabase.app",
   projectId:"core-chat-3be96"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
 
+// DOM Elements
+const username = document.getElementById("username");
+const room = document.getElementById("room");
+const secretKey = document.getElementById("secretKey");
+const mesaj = document.getElementById("mesaj");
+const chat = document.getElementById("chat");
+const localVideo = document.getElementById("localVideo");
+const remoteVideo = document.getElementById("remoteVideo");
+const loginOverlay = document.getElementById("loginOverlay");
+const activationCode = document.getElementById("activationCode");
+const mainContainer = document.getElementById("mainContainer");
+
+// Aktivasyon kontrolü
+const ACTIVATION_SECRET = "SECURE2026";
+function checkActivation(){
+  if(activationCode.value === ACTIVATION_SECRET){
+    loginOverlay.style.display="none";
+    mainContainer.style.display="flex";
+  }else{
+    alert("Aktivasyon kodu yanlış!");
+  }
+}
+
+// Kullanıcı ID
 let myId = localStorage.getItem("myId");
 if(!myId){
   myId = "user_"+Math.random().toString(36).substring(2,9);
   localStorage.setItem("myId",myId);
 }
 
+// AES-GCM helper
 async function getKey(password){
   const enc=new TextEncoder();
   const hash=await crypto.subtle.digest("SHA-256",enc.encode(password));
   return crypto.subtle.importKey("raw",hash,{name:"AES-GCM"},false,["encrypt","decrypt"]);
 }
+function ab2b64(buffer){return btoa(String.fromCharCode(...new Uint8Array(buffer)));}
+function b642ab(base64){return Uint8Array.from(atob(base64),c=>c.charCodeAt(0));}
 
-function ab2b64(buffer){
-  return btoa(String.fromCharCode(...new Uint8Array(buffer)));
-}
-
-function b642ab(base64){
-  return Uint8Array.from(atob(base64),c=>c.charCodeAt(0));
-}
-
+// Mesaj Gönder
 async function sendMessage(){
   if(!room.value||!secretKey.value||!mesaj.value||!username.value) return;
-
-  const key=await getKey(secretKey.value);
-  const iv=crypto.getRandomValues(new Uint8Array(12));
-  const cipher=await crypto.subtle.encrypt(
-    {name:"AES-GCM",iv:iv},
-    key,
-    new TextEncoder().encode(mesaj.value)
-  );
-
-  const combined=new Uint8Array(iv.length+cipher.byteLength);
-  combined.set(iv,0);
-  combined.set(new Uint8Array(cipher),iv.length);
-
+  const key = await getKey(secretKey.value);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const cipher = await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,new TextEncoder().encode(mesaj.value));
+  const combined = new Uint8Array(iv.length+cipher.byteLength);
+  combined.set(iv,0); combined.set(new Uint8Array(cipher),iv.length);
   db.ref("rooms/"+room.value).push({
     message:ab2b64(combined),
     time:Date.now(),
     sender:myId,
     name:username.value
   });
-
   mesaj.value="";
 }
 
-room.addEventListener("change",()=>{
-  chat.innerHTML="";
+// Mesajları dinle
+function listenMessages(){
   db.ref("rooms/"+room.value).off();
-
+  chat.innerHTML="";
   db.ref("rooms/"+room.value).on("child_added",async snap=>{
     const data=snap.val();
     try{
@@ -273,79 +156,63 @@ room.addEventListener("change",()=>{
       const div=document.createElement("div");
       const isMe = data.sender === myId;
       div.className="message "+(isMe?"right":"left");
-
       div.innerHTML=`
         <div class="username">${data.name}</div>
         ${text}
         <div class="timestamp">${new Date(data.time).toLocaleTimeString()}</div>
       `;
-
       chat.appendChild(div);
       chat.scrollTop=chat.scrollHeight;
-
-    }catch{}
+    }catch(err){
+      console.error("Mesaj çözümlenemedi",err);
+    }
   });
-});
-
-// WebRTC
-let localStream;
-let peerConnection;
-const servers={iceServers:[{urls:"stun:stun.l.google.com:19302"}]};
-
-async function initMedia(){
-  localStream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
-  localVideo.srcObject=localStream;
 }
 
+room.addEventListener("input",listenMessages);
+
+// WebRTC
+let localStream; let peerConnection;
+const servers={iceServers:[{urls:"stun:stun.l.google.com:19302"}]};
+async function initMedia(){
+  try{
+    localStream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+    localVideo.srcObject=localStream;
+  }catch(err){
+    alert("Kamera veya mikrofon erişimi reddedildi!");
+  }
+}
 async function createPeer(){
   peerConnection=new RTCPeerConnection(servers);
-
-  localStream.getTracks().forEach(track=>{
-    peerConnection.addTrack(track,localStream);
-  });
-
-  peerConnection.ontrack=e=>{
-    remoteVideo.srcObject=e.streams[0];
-  };
-
+  localStream.getTracks().forEach(track=>peerConnection.addTrack(track,localStream));
+  peerConnection.ontrack=e=>{remoteVideo.srcObject=e.streams[0];};
   peerConnection.onicecandidate=e=>{
-    if(e.candidate){
-      db.ref("calls/"+room.value+"/candidates").push(e.candidate.toJSON());
-    }
+    if(e.candidate) db.ref("calls/"+room.value+"/candidates").push(e.candidate.toJSON());
   };
-
-  db.ref("calls/"+room.value+"/candidates")
-  .on("child_added",snap=>{
-    if(peerConnection){
-      peerConnection.addIceCandidate(new RTCIceCandidate(snap.val()));
-    }
+  db.ref("calls/"+room.value+"/candidates").off();
+  db.ref("calls/"+room.value+"/candidates").on("child_added",snap=>{
+    if(peerConnection) peerConnection.addIceCandidate(new RTCIceCandidate(snap.val()));
   });
 }
 
 async function startCall(){
   await initMedia();
   await createPeer();
-
   const offer=await peerConnection.createOffer();
   await peerConnection.setLocalDescription(offer);
   await db.ref("calls/"+room.value+"/offer").set(offer);
-
-  db.ref("calls/"+room.value+"/answer")
-  .on("value",async snap=>{
+  db.ref("calls/"+room.value+"/answer").on("value",async snap=>{
     const answer=snap.val();
-    if(answer){
-      await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-    }
+    if(answer) await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
   });
 }
 
 async function joinCall(){
   await initMedia();
   await createPeer();
-
   const offerSnap=await db.ref("calls/"+room.value+"/offer").get();
   const offer=offerSnap.val();
-
+  if(!offer) return alert("Oda teklifi bulunamadı!");
   await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
   const answer=await peerConnection.createAnswer();
   await peerConnection.setLocalDescription(answer);
@@ -353,20 +220,14 @@ async function joinCall(){
 }
 
 function endCall(){
-  if(peerConnection)peerConnection.close();
-  if(localStream)localStream.getTracks().forEach(t=>t.stop());
+  if(peerConnection) peerConnection.close();
+  if(localStream) localStream.getTracks().forEach(t=>t.stop());
+  localVideo.srcObject=null; remoteVideo.srcObject=null;
   db.ref("calls/"+room.value).remove();
 }
 
-function toggleMic(){
-  if(localStream)localStream.getAudioTracks()[0].enabled =
-  !localStream.getAudioTracks()[0].enabled;
-}
-
-function toggleCam(){
-  if(localStream)localStream.getVideoTracks()[0].enabled =
-  !localStream.getVideoTracks()[0].enabled;
-}
+function toggleMic(){if(localStream)localStream.getAudioTracks()[0].enabled=!localStream.getAudioTracks()[0].enabled;}
+function toggleCam(){if(localStream)localStream.getVideoTracks()[0].enabled=!localStream.getVideoTracks()[0].enabled;}
 </script>
 
 </body>
