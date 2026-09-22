@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SecureCore X ⚡ Ultimate Bunker Terminal</title>
+<title>SecureCore X ⚡ Ultimate Bunker Terminal (Storage Entegre)</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -152,7 +152,7 @@ body.panic-mode .avatar { border-color: #ff3333; }
   </div>
 
   <div class="crypto-card">
-    <span id="shieldText">> DUVAR: C-MAC Shield & Süreli İmha Aktif</span>
+    <span id="shieldText">> DUVAR: C-MAC Shield & Cloud Storage Aktif</span>
     <select id="expireTime" style="width: 130px; padding: 4px; background: #020503; color: #00ff66; border: 1px solid #00ff6644; font-size: 11px;">
       <option value="0">İmha Yok (Kalıcı)</option>
       <option value="30">30 Saniye Sonra</option>
@@ -170,7 +170,7 @@ body.panic-mode .avatar { border-color: #ff3333; }
   <div class="typing-indicator" id="typingStatus"></div>
   
   <input id="mesaj" placeholder="Şifreli komut yazın veya /clear, /burn yazın..." disabled oninput="handleTyping()">
-  <input type="file" id="dosya" disabled style="padding: 4px; background: #030805; border: 1px solid #00ff6644; color: #00ff66;">
+  <input type="file" id="dosya" disabled style="padding: 4px; background: #030805; border: 1px solid #00ff6644; color: #00ff66;" accept="image/*,video/*,.pdf,.txt">
   <button onclick="sendMessage()" id="sendBtn" disabled>[ KOMUTU GÖNDER & MÜHÜRLE ]</button>
 </div>
 </div>
@@ -180,6 +180,7 @@ body.panic-mode .avatar { border-color: #ff3333; }
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 
 <script>
 const firebaseConfig = {
@@ -194,6 +195,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
+const storage = firebase.storage();
 
 let currentRoom = null;
 let presenceRef = null;
@@ -306,34 +308,59 @@ async function sendMessage(){
   let type = dosyaInput.files.length ? "file" : "text";
   let messageData = {};
 
-  if(type==="text"){
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const cipher = await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,new TextEncoder().encode(mesajVal));
-    const combined = new Uint8Array(iv.length + cipher.byteLength);
-    combined.set(iv,0); combined.set(new Uint8Array(cipher),iv.length);
-    messageData = {data:ab2b64(combined)};
-  } else {
-    const file = dosyaInput.files[0];
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const cipher = await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,await file.arrayBuffer());
-    const combined = new Uint8Array(iv.length + cipher.byteLength);
-    combined.set(iv,0); combined.set(new Uint8Array(cipher),iv.length);
-    messageData = {data:ab2b64(combined),name:file.name,type:file.type};
+  try {
+    if(type==="text"){
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const cipher = await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,new TextEncoder().encode(mesajVal));
+      const combined = new Uint8Array(iv.length + cipher.byteLength);
+      combined.set(iv,0); combined.set(new Uint8Array(cipher),iv.length);
+      messageData = {data:ab2b64(combined)};
+
+      db.ref("rooms/"+roomVal+"/messages").push({
+        message: JSON.stringify(messageData),
+        uid: uid,
+        nickname: currentUserData.nickname,
+        avatar: currentUserData.avatar,
+        time: now,
+        expireAt: expireAt,
+        type: type,
+        cmac: cmacToken
+      });
+      document.getElementById("mesaj").value="";
+    } else {
+      const file = dosyaInput.files[0];
+      const filePath = `bunker_vaults/${roomVal}/${Date.now()}_${file.name}`;
+      const storageRef = storage.ref().child(filePath);
+      
+      // Tam uyumlu Compat SDK Storage yükleme ve URL alma yöntemi
+      const snapshot = await storageRef.put(file);
+      const downloadURL = await snapshot.ref.getDownloadURL();
+
+      // İndirme linkini AES-GCM ile şifreliyoruz
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const cipher = await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,new TextEncoder().encode(downloadURL));
+      const combined = new Uint8Array(iv.length + cipher.byteLength);
+      combined.set(iv,0); combined.set(new Uint8Array(cipher),iv.length);
+      
+      messageData = {data:ab2b64(combined), name:file.name, type:file.type, storagePath: filePath};
+
+      db.ref("rooms/"+roomVal+"/messages").push({
+        message: JSON.stringify(messageData),
+        uid: uid,
+        nickname: currentUserData.nickname,
+        avatar: currentUserData.avatar,
+        time: now,
+        expireAt: expireAt,
+        type: type,
+        cmac: cmacToken
+      });
+
+      document.getElementById("mesaj").value="";
+      dosyaInput.value="";
+    }
+  } catch(err) {
+    alert("Şifreleme veya yükleme hatası: " + err.message);
   }
-
-  db.ref("rooms/"+roomVal+"/messages").push({
-    message: JSON.stringify(messageData),
-    uid: uid,
-    nickname: currentUserData.nickname,
-    avatar: currentUserData.avatar,
-    time: now,
-    expireAt: expireAt,
-    type: type,
-    cmac: cmacToken
-  });
-
-  document.getElementById("mesaj").value="";
-  dosyaInput.value="";
 }
 
 async function connectRoom(){
@@ -342,7 +369,6 @@ async function connectRoom(){
   const keyVal = document.getElementById("secretKey").value;
   if(!roomVal || !keyVal) return alert("Kanal kodu ve anahtar zorunludur!");
   
-  // Önceki odadan ayrılma (dinleyicileri temizle)
   if(currentRoom){ 
     db.ref("rooms/"+currentRoom+"/messages").off();
     db.ref("rooms/"+currentRoom+"/presence").off();
@@ -372,7 +398,7 @@ async function connectRoom(){
   isPanicActive = false;
   document.body.classList.remove("panic-mode");
   document.getElementById("mainTitle").textContent = "[ SECURECORE X // KOMBİNATORYAL KOMUTA MERKEZİ ]";
-  document.getElementById("shieldText").textContent = "> DUVAR: C-MAC Shield & Süreli İmha Aktif";
+  document.getElementById("shieldText").textContent = "> DUVAR: C-MAC Shield & Cloud Storage Aktif";
 
   currentRoom = roomVal;
   document.getElementById("chat").innerHTML="";
@@ -431,12 +457,17 @@ async function connectRoom(){
         const msgObj = JSON.parse(data.message);
         const raw = b642ab(msgObj.data);
         const dec = await crypto.subtle.decrypt({name:"AES-GCM",iv:raw.slice(0,12)},key,raw.slice(12));
+        const decryptedContent = new TextDecoder().decode(dec);
         
         if(data.type==="text"){
-          text = escapeHTML(new TextDecoder().decode(dec));
+          text = escapeHTML(decryptedContent);
         } else {
-          const blob = new Blob([dec],{type:msgObj.type});
-          text = `<a href="${URL.createObjectURL(blob)}" download="${escapeHTML(msgObj.name)}" style="color:#00ff66;">[DOSYA İNDİR: ${escapeHTML(msgObj.name)}]</a>`;
+          const blobUrl = decryptedContent; 
+          if(msgObj.type.startsWith("image/")) {
+            text = `<div>[FOTOĞRAF GÖRSELİ]</div><img src="${escapeHTML(blobUrl)}" style="max-width:100%; max-height:250px; margin-top:4px; border-radius:2px;"><br><a href="${escapeHTML(blobUrl)}" target="_blank" download="${escapeHTML(msgObj.name)}" style="color:#00ff66;font-size:11px;">[ DOSYAYI TAM BOYUT AÇ / İNDİR ]</a>`;
+          } else {
+            text = `<a href="${escapeHTML(blobUrl)}" target="_blank" download="${escapeHTML(msgObj.name)}" style="color:#00ff66;">[DOSYAYI İNDİR: ${escapeHTML(msgObj.name)}]</a>`;
+          }
         }
       }catch(err){
         text = "[ ŞİFRE ÇÖZÜLEMEDİ: YANLIŞ FREKANS ANAHTARI ]";
@@ -452,9 +483,18 @@ async function connectRoom(){
     if(auth.currentUser && auth.currentUser.uid === data.uid){
       const del = document.createElement("button");
       del.textContent="[ İMHA ET ]"; del.className="delete";
-      del.onclick = ()=> {
+      del.onclick = async ()=> {
         playBip(200, 'sawtooth', 0.1);
-        db.ref("rooms/"+currentRoom+"/messages/"+id).remove();
+        try {
+          const msgObj = JSON.parse(data.message);
+          if(msgObj.storagePath) {
+            await storage.ref().child(msgObj.storagePath).delete().catch(()=>{});
+          }
+        } catch(e){}
+
+        db.ref("rooms/"+currentRoom+"/messages/"+id).remove().then(() => {
+          div.remove();
+        });
       };
       div.appendChild(del);
     }
