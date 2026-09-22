@@ -3,160 +3,214 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SecureCore X ⚡</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<title>SecureCore X ⚡ Voice & Chat</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
+
 body{
-  font-family:Inter,sans-serif;
+  font-family:'Plus Jakarta Sans', sans-serif;
   height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
-  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-  background-size: cover;
-  position: relative;
-  color:white;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #2d3748;
 }
+
 .container{
-  position: relative;
-  z-index:1;
-  width:95%;
-  max-width:900px;
-  height:92vh;
-  background: rgba(0,0,0,0.75);
-  backdrop-filter: blur(10px);
-  border-radius:15px;
-  padding:20px;
-  display:flex;
-  flex-direction:column;
-  box-shadow:0 0 25px rgba(255,111,145,0.5);
-  border: 1px solid rgba(255,111,145,0.3);
+  width: 95%;
+  max-width: 900px;
+  height: 94vh;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
+
 h1{
-  font-family:Orbitron;
-  text-align:center;
-  font-size:28px;
-  margin-bottom:15px;
-  color:#ff6f91;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #4a5568;
 }
+
 input{
-  padding:12px;
-  border:none;
-  border-radius:10px;
-  margin:5px 0;
-  width:100%;
-  background:#1c2a38;
-  color:white;
-  border:1px solid #ff6f91;
+  padding: 10px 14px;
+  border: 1px solid #cbd5e0;
+  border-radius: 10px;
+  margin: 4px 0;
+  width: 100%;
+  background: #ffffff;
+  color: #2d3748;
+  font-size: 14px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
 }
-input:focus{outline:none;border:1px solid #ffd166;}
+
+input:focus{
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
 button{
-  padding:10px;
-  border:none;
-  border-radius:10px;
-  margin:5px 0;
-  cursor:pointer;
-  font-weight:bold;
-  background:#ff6f91;
-  color:white;
-  transition:0.2s;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  margin: 4px 0;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: #667eea;
+  color: white;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
-button:hover{opacity:0.9; transform: scale(1.02);}
+
+button:hover{ background: #5a67d8; }
+
+.voice-panel {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.voice-btn {
+  background: #38a169;
+  flex: 1;
+}
+.voice-btn:hover { background: #2f855a; }
+
+.voice-btn.active {
+  background: #e53e3e;
+}
+.voice-btn.active:hover { background: #c53030; }
+
 #chat{
-  flex:1;
-  overflow:auto;
-  margin:10px 0;
-  padding:10px;
-  border-radius:10px;
-  background:#15222bcc;
-  border: 1px solid rgba(255,255,255,0.05);
+  flex: 1;
+  overflow: auto;
+  margin: 8px 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
 }
+
 .message{
-  padding:10px;
-  margin-bottom:10px;
-  border-radius:10px;
-  background:#223843cc;
-  display:flex;
-  flex-direction:column;
-  position:relative;
-  transition: 0.3s;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
-.message:hover{box-shadow: 0 0 15px rgba(255,111,145,0.4); transform: scale(1.01);}
-.small{font-size:11px;opacity:0.6;}
+
+.small{ font-size: 11px; color: #a0aec0; margin-top: 4px; }
+
 .delete{
-  background:#ff4444;
-  padding:4px 8px;
-  font-size:11px;
-  margin-top:5px;
-  cursor:pointer;
-  border:none;
-  border-radius:5px;
+  background: #fed7d7;
+  color: #c53030;
+  padding: 3px 8px;
+  font-size: 11px;
+  margin-top: 6px;
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
   width: fit-content;
+  box-shadow: none;
 }
+.delete:hover { background: #feb2b2; }
+
 .decoded{
-  color:#ffd166;
-  font-weight:bold;
+  color: #2b6cb0;
+  font-weight: 600;
   word-break: break-all;
+  margin: 4px 0;
+  font-size: 14px;
 }
+
 .room-info{
-  display:flex;
-  justify-content:space-between;
-  font-size:12px;
-  opacity:0.8;
-  margin-bottom:5px;
-  background: rgba(255,255,255,0.05);
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #718096;
+  margin-bottom: 6px;
+  background: #edf2f7;
   padding: 6px 10px;
   border-radius: 8px;
 }
+
 .typing-indicator {
   font-size: 11px;
-  color: #ffd166;
-  font-style: italic;
-  height: 18px;
-  margin-bottom: 5px;
+  color: #d69e2e;
+  height: 16px;
+  margin-bottom: 4px;
+  font-weight: 500;
 }
-.avatar{
-  width:28px; height:28px; border-radius:50%; margin-right:6px; object-fit: cover;
+
+.avatar{ width: 24px; height: 24px; border-radius: 50%; margin-right: 8px; object-fit: cover; }
+.userRow{ display: flex; align-items: center; margin-bottom: 2px; }
+
+#loginBox, #appBox {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 400px;
+  margin: auto;
+  width: 100%;
 }
-.userRow{
-  display:flex; align-items:center; margin-bottom: 4px;
-}
+#appBox { max-width: 100%; }
 </style>
 </head>
 <body>
 
 <div class="container">
-<h1>SecureCore X ⚡</h1>
+<h1>SecureCore X ⚡ Sesli & Şifreli Sohbet</h1>
 
 <div id="loginBox">
-  <input id="email" placeholder="Email">
+  <input id="email" placeholder="E-posta Adresi">
   <input id="password" type="password" placeholder="Şifre">
-  <input id="nickname" placeholder="Takma ad">
-  <input id="avatarURL" placeholder="Profil resmi URL (opsiyonel)">
+  <input id="nickname" placeholder="Takma Adınız">
+  <input id="avatarURL" placeholder="Avatar URL (Opsiyonel)">
   <button onclick="login()">Giriş Yap</button>
 </div>
 
 <div id="appBox" style="display:none;flex:1;flex-direction:column;">
-  <div style="display:flex; gap: 5px;">
-    <input id="room" placeholder="Oda adı" style="flex:1;">
-    <input id="secretKey" placeholder="Ortak Gizli Anahtar" style="flex:1;" type="password">
-    <button onclick="connectRoom()" style="padding: 0 15px; margin: 5px 0;">Bağlan</button>
+  <div style="display:flex; gap: 6px;">
+    <input id="room" placeholder="Oda Adı" style="flex:1;">
+    <input id="secretKey" placeholder="Gizli Anahtar" style="flex:1;" type="password">
+    <button onclick="connectRoom()" style="padding: 0 16px;">Bağlan</button>
   </div>
   
+  <div class="voice-panel">
+    <button id="voiceToggleBtn" class="voice-btn" onclick="toggleVoice()" disabled>🎤 Sesli Sohbeti Başlat</button>
+  </div>
+
   <div class="room-info">
-    <div id="onlineCount">Mesaj Sayısı: 0</div>
-    <div id="activeUsers">Aktif Odadakiler: -</div>
+    <div id="onlineCount">Mesaj: 0</div>
+    <div id="activeUsers">Aktif: -</div>
   </div>
 
   <div id="chat"></div>
   <div class="typing-indicator" id="typingStatus"></div>
   
-  <input id="mesaj" placeholder="Mesaj yaz..." disabled>
-  <input type="file" id="dosya" disabled>
+  <input id="mesaj" placeholder="Mesajınızı yazın..." disabled>
+  <input type="file" id="dosya" disabled style="padding: 4px;">
   <button onclick="sendMessage()" id="sendBtn" disabled>Gönder</button>
 </div>
 </div>
+
+<!-- Gizli ses öğesi (Karşı tarafın sesini oynatmak için) -->
+<audio id="remoteAudio" autoplay></audio>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -179,25 +233,43 @@ const db = firebase.database();
 let currentRoom = null;
 let typingRef = null;
 let presenceRef = null;
-const colors = ["#ff4444","#00ffff","#ffaa00","#00ff00","#ff00ff","#ff6f91"];
+let currentUserData = null;
+const colors = ["#4299e1","#48bb78","#ed8936","#9f7aea","#38b2ac","#e53e3e"];
+
+// WebRTC Değişkenleri
+let localStream = null;
+let peerConnection = null;
+let isVoiceActive = false;
+const iceServers = {
+  iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+};
 
 function login(){
-  if(!nickname.value) return alert("Takma ad boş olamaz!");
-  auth.signInWithEmailAndPassword(email.value, password.value)
-  .then(async ()=>{
-    const uid = auth.currentUser.uid;
-    await db.ref("users/"+uid).set({
-      nickname: nickname.value,
-      avatar: avatarURL.value || ''
-    });
+  const nickVal = document.getElementById("nickname").value;
+  const emailVal = document.getElementById("email").value;
+  const passVal = document.getElementById("password").value;
+  const avatarVal = document.getElementById("avatarURL").value;
+
+  if(!nickVal) return alert("Takma ad boş olamaz!");
+
+  auth.signInWithEmailAndPassword(emailVal, passVal)
+  .then(async (userCredential)=>{
+    const uid = userCredential.user.uid;
+    currentUserData = { nickname: nickVal, avatar: avatarVal || '' };
+    await db.ref("users/"+uid).set(currentUserData);
     loginBox.style.display="none";
     appBox.style.display="flex";
   })
   .catch(e=>alert(e.message));
 }
 
-auth.onAuthStateChanged(user=>{
-  if(user){loginBox.style.display="none"; appBox.style.display="flex";}
+auth.onAuthStateChanged(async user=>{
+  if(user){
+    loginBox.style.display="none";
+    appBox.style.display="flex";
+    const snap = await db.ref("users/"+user.uid).get();
+    currentUserData = snap.exists() ? snap.val() : { nickname: "Kullanıcı", avatar: "" };
+  }
 });
 
 async function getKey(password){
@@ -215,22 +287,28 @@ async function sendMessage(){
   const now = Date.now();
   if(now - lastSent < 1000) return alert("1 saniyede bir mesaj gönderebilirsiniz");
   lastSent = now;
-  if(!room.value || !secretKey.value || (!mesaj.value && !dosya.files.length)) return alert("Alanlar boş olamaz");
+  
+  const roomVal = document.getElementById("room").value;
+  const keyVal = document.getElementById("secretKey").value;
+  const mesajVal = document.getElementById("mesaj").value;
+  const dosyaInput = document.getElementById("dosya");
 
-  const key = await getKey(secretKey.value);
-  let type = dosya.files.length ? "file" : "text";
+  if(!roomVal || !keyVal || (!mesajVal && !dosyaInput.files.length)) return alert("Alanlar boş olamaz");
+
+  const key = await getKey(keyVal);
+  let type = dosyaInput.files.length ? "file" : "text";
   let messageData = {};
 
   if(type==="text"){
     const iv = crypto.getRandomValues(new Uint8Array(12));
     const enc = new TextEncoder();
-    const cipher = await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,enc.encode(mesaj.value));
+    const cipher = await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,enc.encode(mesajVal));
     const combined = new Uint8Array(iv.length + cipher.byteLength);
     combined.set(iv,0);
     combined.set(new Uint8Array(cipher),iv.length);
     messageData = {data:ab2b64(combined)};
   } else {
-    const file = dosya.files[0];
+    const file = dosyaInput.files[0];
     const arrayBuffer = await file.arrayBuffer();
     const iv = crypto.getRandomValues(new Uint8Array(12));
     const cipher = await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,arrayBuffer);
@@ -240,56 +318,58 @@ async function sendMessage(){
     messageData = {data:ab2b64(combined),name:file.name,type:file.type};
   }
 
-  const userRef = db.ref("users/"+auth.currentUser.uid);
-  const userData = (await userRef.get()).val();
-
-  db.ref("rooms/"+room.value+"/messages").push({
+  db.ref("rooms/"+roomVal+"/messages").push({
     message: JSON.stringify(messageData),
-    user: auth.currentUser.email,
-    nickname: userData.nickname,
-    avatar: userData.avatar || '',
+    uid: auth.currentUser.uid,
+    nickname: currentUserData ? currentUserData.nickname : "Kullanıcı",
+    avatar: currentUserData ? currentUserData.avatar : '',
     time: Date.now(),
     type: type
   });
 
-  mesaj.value=""; dosya.value="";
+  document.getElementById("mesaj").value="";
+  dosyaInput.value="";
   if(typingRef) typingRef.set(false);
 }
 
-// Oda Bağlantısı ve Yönetimi
 async function connectRoom(){
-  if(!room.value || !secretKey.value) return alert("Oda adı ve Gizli Anahtar girilmelidir!");
+  const roomVal = document.getElementById("room").value;
+  const keyVal = document.getElementById("secretKey").value;
+
+  if(!roomVal || !keyVal) return alert("Oda adı ve Gizli Anahtar zorunludur!");
   
   if(currentRoom){
     db.ref("rooms/"+currentRoom+"/messages").off();
-    db.ref("rooms/"+currentRoom+"/messages").off();
+    db.ref("rooms/"+currentRoom+"/calls").off();
     if(presenceRef) presenceRef.remove();
     if(typingRef) typingRef.set(false);
+    stopVoice();
   }
 
-  currentRoom = room.value;
-  chat.innerHTML="";
+  currentRoom = roomVal;
+  document.getElementById("chat").innerHTML="";
   
-  mesaj.disabled = false;
-  dosya.disabled = false;
-  sendBtn.disabled = false;
+  document.getElementById("mesaj").disabled = false;
+  document.getElementById("dosya").disabled = false;
+  document.getElementById("sendBtn").disabled = false;
+  document.getElementById("voiceToggleBtn").disabled = false;
 
   const uid = auth.currentUser.uid;
-  const userRef = db.ref("users/"+uid);
-  const userData = (await userRef.get()).val();
+  if(!currentUserData){
+    const snap = await db.ref("users/"+uid).get();
+    currentUserData = snap.val() || { nickname: "Kullanıcı", avatar: "" };
+  }
 
-  // Presence (Aktif Kullanıcı) Entegrasyonu
   presenceRef = db.ref("rooms/"+currentRoom+"/presence/"+uid);
-  presenceRef.set({nickname: userData.nickname});
+  presenceRef.set({nickname: currentUserData.nickname});
   presenceRef.onDisconnect().remove();
 
   db.ref("rooms/"+currentRoom+"/presence").on("value", snap=>{
     const users = snap.val();
     const names = users ? Object.values(users).map(u => u.nickname).join(", ") : "-";
-    activeUsers.textContent = "Aktif: " + names;
+    document.getElementById("activeUsers").textContent = "Aktif: " + names;
   });
 
-  // Mesaj Dinleyicisi
   db.ref("rooms/"+currentRoom+"/messages").on("child_added", async snap=>{
     const data = snap.val();
     const id = snap.key;
@@ -301,7 +381,7 @@ async function connectRoom(){
 
     let text="🔒 Mesaj çözülemedi!";
     try{
-      const key = await getKey(secretKey.value);
+      const key = await getKey(document.getElementById("secretKey").value);
       const msgObj = JSON.parse(data.message);
       const raw = b642ab(msgObj.data);
       const iv = raw.slice(0,12);
@@ -313,9 +393,9 @@ async function connectRoom(){
       } else {
         const blob = new Blob([dec],{type:msgObj.type});
         if(msgObj.type.startsWith("image/")){
-          text = `<img src="${URL.createObjectURL(blob)}" style="max-width:100%;border-radius:10px;">`;
+          text = `<img src="${URL.createObjectURL(blob)}" style="max-width:100%;border-radius:8px;margin-top:6px;">`;
         } else {
-          text = `<a href="${URL.createObjectURL(blob)}" download="${escapeHTML(msgObj.name)}" style="color:#ffd166;">${escapeHTML(msgObj.name)}</a>`;
+          text = `<a href="${URL.createObjectURL(blob)}" download="${escapeHTML(msgObj.name)}" style="color:#3182ce;text-decoration:none;">${escapeHTML(msgObj.name)}</a>`;
         }
       }
     }catch{}
@@ -325,7 +405,7 @@ async function connectRoom(){
                      <div class="decoded">${text}</div>
                      <div class="small">${new Date(data.time).toLocaleString()}</div>`;
 
-    if(auth.currentUser.email===data.user){
+    if(auth.currentUser && auth.currentUser.uid === data.uid){
       const del = document.createElement("button");
       del.textContent="Sil";
       del.className="delete";
@@ -333,45 +413,125 @@ async function connectRoom(){
       div.appendChild(del);
     }
 
-    chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
+    const chatDiv = document.getElementById("chat");
+    chatDiv.appendChild(div);
+    chatDiv.scrollTop = chatDiv.scrollHeight;
   });
 
   db.ref("rooms/"+currentRoom+"/messages").on("value", snap=>{
-    onlineCount.textContent = "Mesaj Sayısı: " + snap.numChildren();
+    document.getElementById("onlineCount").textContent = "Mesaj: " + snap.numChildren();
   });
 
-  // Yazıyor... (Typing) Özelliği
   typingRef = db.ref("rooms/"+currentRoom+"/typing/"+uid);
   let typingTimeout;
   
-  mesaj.oninput = () => {
-    typingRef.set(userData.nickname);
+  const mesajInput = document.getElementById("mesaj");
+  mesajInput.oninput = () => {
+    typingRef.set(currentUserData.nickname);
     clearTimeout(typingTimeout);
-    typingTimeout = setTimeout(() => {
-      typingRef.remove();
-    }, 2000);
+    typingTimeout = setTimeout(() => { typingRef.remove(); }, 2000);
   };
 
   db.ref("rooms/"+currentRoom+"/typing").on("value", snap=>{
     const typingData = snap.val();
-    if(!typingData) {
-      typingStatus.textContent = "";
-      return;
-    }
-    const typers = Object.entries(typingData)
-      .filter(([id]) => id !== uid)
-      .map(([_, name]) => name);
-
-    if(typers.length > 0) {
-      typingStatus.textContent = typers.join(", ") + " yazıyor...";
-    } else {
-      typingStatus.textContent = "";
-    }
+    if(!typingData) { document.getElementById("typingStatus").textContent = ""; return; }
+    const typers = Object.entries(typingData).filter(([id]) => id !== uid).map(([_, name]) => name);
+    document.getElementById("typingStatus").textContent = typers.length > 0 ? typers.join(", ") + " yazıyor..." : "";
   });
 }
 
-mesaj.addEventListener("keypress", e=>{if(e.key==="Enter") sendMessage();});
+// Sesli Sohbet Yönetimi (WebRTC)
+async function toggleVoice(){
+  const btn = document.getElementById("voiceToggleBtn");
+  if(!isVoiceActive){
+    try {
+      localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      setupPeerConnection();
+      
+      // Arayanı veya katılanı simüle etmek için oda sinyalleşme alanı
+      const callRef = db.ref("rooms/"+currentRoom+"/calls/"+auth.currentUser.uid);
+      callRef.set({ active: true });
+      callRef.onDisconnect().remove();
+
+      // Odada başkası var mı dinle, varsa Offer oluştur
+      db.ref("rooms/"+currentRoom+"/calls").on("child_added", async snap => {
+        const peerId = snap.key;
+        if(peerId !== auth.currentUser.uid && peerConnection) {
+          const offer = await peerConnection.createOffer();
+          await peerConnection.setLocalDescription(offer);
+          db.ref("rooms/"+currentRoom+"/signals/"+auth.currentUser.uid).set({ type: "offer", sdp: offer });
+        }
+      });
+
+      // Sinyalleri dinle (Offer/Answer/ICE)
+      db.ref("rooms/"+currentRoom+"/signals").on("child_added", async snap => {
+        const signalData = snap.val();
+        const senderId = snap.key;
+        if(senderId !== auth.currentUser.uid && peerConnection) {
+          if(signalData.type === "offer") {
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(signalData.sdp));
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+            db.ref("rooms/"+currentRoom+"/signals/"+auth.currentUser.uid).set({ type: "answer", sdp: answer });
+          } else if(signalData.type === "answer") {
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(signalData.sdp));
+          } else if(signalData.candidate) {
+            await peerConnection.addIceCandidate(new RTCIceCandidate(signalData.candidate));
+          }
+        }
+      });
+
+      btn.textContent = "🛑 Sesli Sohbeti Kapat";
+      btn.classList.add("active");
+      isVoiceActive = true;
+    } catch(err) {
+      alert("Mikrofon izni alınamadı: " + err.message);
+    }
+  } else {
+    stopVoice();
+  }
+}
+
+function setupPeerConnection(){
+  peerConnection = new RTCPeerConnection(iceServers);
+  
+  localStream.getTracks().forEach(track => {
+    peerConnection.addTrack(track, localStream);
+  });
+
+  peerConnection.ontrack = event => {
+    const remoteAudio = document.getElementById("remoteAudio");
+    remoteAudio.srcObject = event.streams[0];
+  };
+
+  peerConnection.onicecandidate = event => {
+    if(event.candidate) {
+      db.ref("rooms/"+currentRoom+"/signals/"+auth.currentUser.uid).push({ candidate: event.candidate.toJSON() });
+    }
+  };
+}
+
+function stopVoice(){
+  if(localStream){
+    localStream.getTracks().forEach(track => track.stop());
+  }
+  if(peerConnection){
+    peerConnection.close();
+    peerConnection = null;
+  }
+  if(currentRoom && auth.currentUser) {
+    db.ref("rooms/"+currentRoom+"/calls/"+auth.currentUser.uid).remove();
+    db.ref("rooms/"+currentRoom+"/signals/"+auth.currentUser.uid).remove();
+  }
+  const btn = document.getElementById("voiceToggleBtn");
+  if(btn){
+    btn.textContent = "🎤 Sesli Sohbeti Başlat";
+    btn.classList.remove("active");
+  }
+  isVoiceActive = false;
+}
+
+document.getElementById("mesaj").addEventListener("keypress", e=>{if(e.key==="Enter") sendMessage();});
 </script>
 </body>
 </html>
