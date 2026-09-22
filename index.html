@@ -13,35 +13,30 @@ body{
   display:flex;
   justify-content:center;
   align-items:center;
-  background: url('https://source.unsplash.com/1600x900/?technology,abstract') no-repeat center center fixed;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
   background-size: cover;
   position: relative;
   color:white;
-}
-body::before{
-  content:"";
-  position:absolute;
-  top:0; left:0; right:0; bottom:0;
-  background: rgba(0,0,0,0.5);
-  z-index:0;
 }
 .container{
   position: relative;
   z-index:1;
   width:95%;
   max-width:900px;
-  height:90vh;
-  background: rgba(0,0,0,0.6);
+  height:92vh;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(10px);
   border-radius:15px;
   padding:20px;
   display:flex;
   flex-direction:column;
-  box-shadow:0 0 20px rgba(255,111,145,0.7);
+  box-shadow:0 0 25px rgba(255,111,145,0.5);
+  border: 1px solid rgba(255,111,145,0.3);
 }
 h1{
   font-family:Orbitron;
   text-align:center;
-  font-size:32px;
+  font-size:28px;
   margin-bottom:15px;
   color:#ff6f91;
 }
@@ -67,26 +62,27 @@ button{
   color:white;
   transition:0.2s;
 }
-button:hover{opacity:0.9; transform: scale(1.05);}
+button:hover{opacity:0.9; transform: scale(1.02);}
 #chat{
   flex:1;
   overflow:auto;
   margin:10px 0;
   padding:10px;
   border-radius:10px;
-  background:#203a43cc;
+  background:#15222bcc;
+  border: 1px solid rgba(255,255,255,0.05);
 }
 .message{
   padding:10px;
   margin-bottom:10px;
   border-radius:10px;
-  background:#30475ecc;
+  background:#223843cc;
   display:flex;
   flex-direction:column;
   position:relative;
   transition: 0.3s;
 }
-.message:hover{box-shadow: 0 0 15px #ff6f91; transform: scale(1.02);}
+.message:hover{box-shadow: 0 0 15px rgba(255,111,145,0.4); transform: scale(1.01);}
 .small{font-size:11px;opacity:0.6;}
 .delete{
   background:#ff4444;
@@ -96,22 +92,35 @@ button:hover{opacity:0.9; transform: scale(1.05);}
   cursor:pointer;
   border:none;
   border-radius:5px;
+  width: fit-content;
 }
 .decoded{
   color:#ffd166;
   font-weight:bold;
+  word-break: break-all;
 }
-.online{
+.room-info{
+  display:flex;
+  justify-content:space-between;
   font-size:12px;
-  text-align:right;
-  opacity:0.7;
+  opacity:0.8;
   margin-bottom:5px;
+  background: rgba(255,255,255,0.05);
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+.typing-indicator {
+  font-size: 11px;
+  color: #ffd166;
+  font-style: italic;
+  height: 18px;
+  margin-bottom: 5px;
 }
 .avatar{
-  width:28px; height:28px; border-radius:50%; margin-right:6px;
+  width:28px; height:28px; border-radius:50%; margin-right:6px; object-fit: cover;
 }
 .userRow{
-  display:flex; align-items:center;
+  display:flex; align-items:center; margin-bottom: 4px;
 }
 </style>
 </head>
@@ -129,13 +138,23 @@ button:hover{opacity:0.9; transform: scale(1.05);}
 </div>
 
 <div id="appBox" style="display:none;flex:1;flex-direction:column;">
-  <input id="room" placeholder="Oda adı">
-  <input id="secretKey" placeholder="Ortak Gizli Anahtar">
-  <div class="online" id="onlineCount"></div>
+  <div style="display:flex; gap: 5px;">
+    <input id="room" placeholder="Oda adı" style="flex:1;">
+    <input id="secretKey" placeholder="Ortak Gizli Anahtar" style="flex:1;" type="password">
+    <button onclick="connectRoom()" style="padding: 0 15px; margin: 5px 0;">Bağlan</button>
+  </div>
+  
+  <div class="room-info">
+    <div id="onlineCount">Mesaj Sayısı: 0</div>
+    <div id="activeUsers">Aktif Odadakiler: -</div>
+  </div>
+
   <div id="chat"></div>
-  <input id="mesaj" placeholder="Mesaj yaz...">
-  <input type="file" id="dosya">
-  <button onclick="sendMessage()">Gönder</button>
+  <div class="typing-indicator" id="typingStatus"></div>
+  
+  <input id="mesaj" placeholder="Mesaj yaz..." disabled>
+  <input type="file" id="dosya" disabled>
+  <button onclick="sendMessage()" id="sendBtn" disabled>Gönder</button>
 </div>
 </div>
 
@@ -144,7 +163,6 @@ button:hover{opacity:0.9; transform: scale(1.05);}
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
 <script>
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyB9hBRTJ4BLMLpmAPxwPdbrNbk2UuAV3i4",
   authDomain: "core-chat-3be96.firebaseapp.com",
@@ -158,10 +176,14 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// Login
+let currentRoom = null;
+let typingRef = null;
+let presenceRef = null;
+const colors = ["#ff4444","#00ffff","#ffaa00","#00ff00","#ff00ff","#ff6f91"];
+
 function login(){
   if(!nickname.value) return alert("Takma ad boş olamaz!");
-  auth.signInWithEmailAndPassword(email.value,password.value)
+  auth.signInWithEmailAndPassword(email.value, password.value)
   .then(async ()=>{
     const uid = auth.currentUser.uid;
     await db.ref("users/"+uid).set({
@@ -178,7 +200,6 @@ auth.onAuthStateChanged(user=>{
   if(user){loginBox.style.display="none"; appBox.style.display="flex";}
 });
 
-// Encryption helpers
 async function getKey(password){
   const enc = new TextEncoder();
   const hash = await crypto.subtle.digest("SHA-256", enc.encode(password));
@@ -188,10 +209,8 @@ function ab2b64(buffer){ return btoa(String.fromCharCode(...new Uint8Array(buffe
 function b642ab(base64){ return Uint8Array.from(atob(base64), c=>c.charCodeAt(0)); }
 function escapeHTML(text){ const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
 
-// Rate limit
 let lastSent = 0;
 
-// Send message or file
 async function sendMessage(){
   const now = Date.now();
   if(now - lastSent < 1000) return alert("1 saniyede bir mesaj gönderebilirsiniz");
@@ -224,7 +243,7 @@ async function sendMessage(){
   const userRef = db.ref("users/"+auth.currentUser.uid);
   const userData = (await userRef.get()).val();
 
-  db.ref("rooms/"+room.value).push({
+  db.ref("rooms/"+room.value+"/messages").push({
     message: JSON.stringify(messageData),
     user: auth.currentUser.email,
     nickname: userData.nickname,
@@ -234,22 +253,47 @@ async function sendMessage(){
   });
 
   mesaj.value=""; dosya.value="";
+  if(typingRef) typingRef.set(false);
 }
 
-mesaj.addEventListener("keypress", e=>{if(e.key==="Enter") sendMessage();});
+// Oda Bağlantısı ve Yönetimi
+async function connectRoom(){
+  if(!room.value || !secretKey.value) return alert("Oda adı ve Gizli Anahtar girilmelidir!");
+  
+  if(currentRoom){
+    db.ref("rooms/"+currentRoom+"/messages").off();
+    db.ref("rooms/"+currentRoom+"/messages").off();
+    if(presenceRef) presenceRef.remove();
+    if(typingRef) typingRef.set(false);
+  }
 
-let currentRoom = null;
-const colors = ["#ff4444","#00ffff","#ffaa00","#00ff00","#ff00ff","#ff6f91"];
-
-room.addEventListener("change", ()=>{
-  chat.innerHTML="";
-  if(currentRoom) db.ref("rooms/"+currentRoom).off();
   currentRoom = room.value;
+  chat.innerHTML="";
+  
+  mesaj.disabled = false;
+  dosya.disabled = false;
+  sendBtn.disabled = false;
 
-  db.ref("rooms/"+currentRoom).on("child_added", async snap=>{
+  const uid = auth.currentUser.uid;
+  const userRef = db.ref("users/"+uid);
+  const userData = (await userRef.get()).val();
+
+  // Presence (Aktif Kullanıcı) Entegrasyonu
+  presenceRef = db.ref("rooms/"+currentRoom+"/presence/"+uid);
+  presenceRef.set({nickname: userData.nickname});
+  presenceRef.onDisconnect().remove();
+
+  db.ref("rooms/"+currentRoom+"/presence").on("value", snap=>{
+    const users = snap.val();
+    const names = users ? Object.values(users).map(u => u.nickname).join(", ") : "-";
+    activeUsers.textContent = "Aktif: " + names;
+  });
+
+  // Mesaj Dinleyicisi
+  db.ref("rooms/"+currentRoom+"/messages").on("child_added", async snap=>{
     const data = snap.val();
     const id = snap.key;
-    const messageRef = db.ref("rooms/"+currentRoom+"/"+id);
+    const messageRef = db.ref("rooms/"+currentRoom+"/messages/"+id);
 
     const div = document.createElement("div");
     div.className="message";
@@ -259,17 +303,14 @@ room.addEventListener("change", ()=>{
     try{
       const key = await getKey(secretKey.value);
       const msgObj = JSON.parse(data.message);
+      const raw = b642ab(msgObj.data);
+      const iv = raw.slice(0,12);
+      const cipher = raw.slice(12);
+      const dec = await crypto.subtle.decrypt({name:"AES-GCM",iv:iv},key,cipher);
+
       if(data.type==="text"){
-        const raw = b642ab(msgObj.data);
-        const iv = raw.slice(0,12);
-        const cipher = raw.slice(12);
-        const dec = await crypto.subtle.decrypt({name:"AES-GCM",iv:iv},key,cipher);
         text = escapeHTML(new TextDecoder().decode(dec));
       } else {
-        const raw = b642ab(msgObj.data);
-        const iv = raw.slice(0,12);
-        const cipher = raw.slice(12);
-        const dec = await crypto.subtle.decrypt({name:"AES-GCM",iv:iv},key,cipher);
         const blob = new Blob([dec],{type:msgObj.type});
         if(msgObj.type.startsWith("image/")){
           text = `<img src="${URL.createObjectURL(blob)}" style="max-width:100%;border-radius:10px;">`;
@@ -296,10 +337,41 @@ room.addEventListener("change", ()=>{
     chat.scrollTop = chat.scrollHeight;
   });
 
-  db.ref("rooms/"+currentRoom).on("value", snap=>{
+  db.ref("rooms/"+currentRoom+"/messages").on("value", snap=>{
     onlineCount.textContent = "Mesaj Sayısı: " + snap.numChildren();
   });
-});
+
+  // Yazıyor... (Typing) Özelliği
+  typingRef = db.ref("rooms/"+currentRoom+"/typing/"+uid);
+  let typingTimeout;
+  
+  mesaj.oninput = () => {
+    typingRef.set(userData.nickname);
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+      typingRef.remove();
+    }, 2000);
+  };
+
+  db.ref("rooms/"+currentRoom+"/typing").on("value", snap=>{
+    const typingData = snap.val();
+    if(!typingData) {
+      typingStatus.textContent = "";
+      return;
+    }
+    const typers = Object.entries(typingData)
+      .filter(([id]) => id !== uid)
+      .map(([_, name]) => name);
+
+    if(typers.length > 0) {
+      typingStatus.textContent = typers.join(", ") + " yazıyor...";
+    } else {
+      typingStatus.textContent = "";
+    }
+  });
+}
+
+mesaj.addEventListener("keypress", e=>{if(e.key==="Enter") sendMessage();});
 </script>
 </body>
 </html>
