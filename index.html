@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SecureCore X ⚡ Ultimate Bunker Terminal (Storage Entegre)</title>
+<title>SecureCore X ⚡ Ultimate Bunker Terminal (Admin Entegre)</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -26,6 +26,12 @@ body.panic-mode {
   color: #ff3333;
 }
 
+body.admin-mode {
+  background: linear-gradient(rgba(10, 5, 20, 0.9), rgba(15, 8, 30, 0.96)), 
+              url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1920&auto=format&fit=crop') no-repeat center center fixed;
+  color: #cc66ff;
+}
+
 body::after {
   content: " ";
   display: block;
@@ -42,6 +48,7 @@ body::after {
   pointer-events: none; z-index: 9998; letter-spacing: 2px;
 }
 body.panic-mode #watermark { color: rgba(255, 51, 51, 0.25); }
+body.admin-mode #watermark { color: rgba(204, 102, 255, 0.25); }
 
 .container{
   width: 95%; max-width: 950px; height: 96vh;
@@ -59,6 +66,11 @@ body.panic-mode .container {
   border-color: #ff333366;
   box-shadow: 0 0 35px rgba(255, 51, 51, 0.3), inset 0 0 20px rgba(255, 51, 51, 0.05);
 }
+body.admin-mode .container {
+  background: rgba(10, 5, 20, 0.95);
+  border-color: #cc66ff66;
+  box-shadow: 0 0 35px rgba(204, 102, 255, 0.3), inset 0 0 20px rgba(204, 102, 255, 0.05);
+}
 
 h1{
   text-align: center; font-size: 16px; font-weight: 700; margin-bottom: 8px;
@@ -67,6 +79,7 @@ h1{
   border-bottom: 1px dashed #00ff6644; padding-bottom: 6px;
 }
 body.panic-mode h1 { color: #ff3333; text-shadow: 0 0 8px rgba(255, 51, 51, 0.6); border-bottom-color: #ff333344; }
+body.admin-mode h1 { color: #cc66ff; text-shadow: 0 0 8px rgba(204, 102, 255, 0.6); border-bottom-color: #cc66ff44; }
 
 input, select{
   padding: 10px 14px; border: 1px solid #00ff6644; border-radius: 2px;
@@ -74,8 +87,10 @@ input, select{
   font-family: 'Share Tech Mono', monospace;
 }
 body.panic-mode input, body.panic-mode select { background: #080202; color: #ff3333; border-color: #ff333344; }
+body.admin-mode input, body.admin-mode select { background: #05020a; color: #cc66ff; border-color: #cc66ff44; }
 input:focus, select:focus{ outline: none; border-color: #00ff66; box-shadow: 0 0 8px rgba(0, 255, 102, 0.4); }
 body.panic-mode input:focus { border-color: #ff3333; box-shadow: 0 0 8px rgba(255, 51, 51, 0.4); }
+body.admin-mode input:focus { border-color: #cc66ff; box-shadow: 0 0 8px rgba(204, 102, 255, 0.4); }
 
 button{
   padding: 10px 14px; border: 1px solid #00ff66; border-radius: 2px; margin: 4px 0;
@@ -84,11 +99,14 @@ button{
   transition: all 0.2s ease;
 }
 body.panic-mode button { background: #220000; color: #ff3333; border-color: #ff3333; }
+body.admin-mode button { background: #1a0033; color: #cc66ff; border-color: #cc66ff; }
 button:hover{ background: #00ff66; color: #030805; box-shadow: 0 0 10px #00ff66; }
 body.panic-mode button:hover { background: #ff3333; color: #1a0000; box-shadow: 0 0 10px #ff3333; }
+body.admin-mode button:hover { background: #cc66ff; color: #10001a; box-shadow: 0 0 10px #cc66ff; }
 
 .voice-btn { background: #022a14; border-color: #00cc55; flex: 1; }
 body.panic-mode .voice-btn { background: #2a0202; border-color: #cc0000; }
+body.admin-mode .voice-btn { background: #26004d; border-color: #b84dff; }
 .voice-btn.active { background: #3a0202; border-color: #ff3333; color: #ff3333; box-shadow: 0 0 10px #ff3333; }
 
 .crypto-card {
@@ -96,32 +114,44 @@ body.panic-mode .voice-btn { background: #2a0202; border-color: #cc0000; }
   display: flex; justify-content: space-between; align-items: center;
 }
 body.panic-mode .crypto-card { background: #0a0303; border-color: #ff333344; color: #cc3333; }
+body.admin-mode .crypto-card { background: #0a0314; border-color: #cc66ff44; color: #b84dff; }
 
 #chat{
   flex: 1; overflow: auto; margin: 6px 0; padding: 12px; border-radius: 2px;
   background: #020503; border: 1px solid #00ff6633;
 }
 body.panic-mode #chat { background: #050202; border-color: #ff333333; }
+body.admin-mode #chat { background: #030108; border-color: #cc66ff33; }
 
 .message{
   padding: 8px 12px; margin-bottom: 8px; border-radius: 2px;
   background: #030a06; border-left: 3px solid #00ff66; display: flex; flex-direction: column; position: relative;
 }
 .message.compromised { border-left-color: #ff3333; background: #120404; color: #ff9999; }
+.message.admin-msg { border-left-color: #cc66ff; background: #0d041a; color: #e6ccff; }
 .small{ font-size: 10px; color: #008833; margin-top: 4px; }
 body.panic-mode .small { color: #880000; }
+body.admin-mode .small { color: #9933ff; }
 .delete{ background: #220000; color: #ff3333; border: 1px solid #ff3333; padding: 2px 6px; font-size: 10px; margin-top: 4px; cursor: pointer; border-radius: 2px; width: fit-content; }
 .decoded{ color: #ccffdd; font-weight: 600; word-break: break-all; margin: 4px 0; font-size: 13px; }
 body.panic-mode .decoded { color: #ffcccc; }
+body.admin-mode .decoded { color: #f2e6ff; }
 .room-info{ display: flex; justify-content: space-between; font-size: 11px; color: #00bb55; margin-bottom: 6px; background: #030a06; padding: 6px 10px; border: 1px solid #00ff6633; }
 body.panic-mode .room-info { color: #bb5555; background: #0a0303; border-color: #ff333333; }
+body.admin-mode .room-info { color: #b84dff; background: #0a0314; border-color: #cc66ff33; }
 .typing-indicator { font-size: 11px; color: #ffcc00; height: 16px; margin-bottom: 4px; }
 .avatar{ width: 22px; height: 22px; border-radius: 50%; margin-right: 8px; object-fit: cover; border: 1px solid #00ff66; }
 body.panic-mode .avatar { border-color: #ff3333; }
+body.admin-mode .avatar { border-color: #cc66ff; }
 .userRow{ display: flex; align-items: center; margin-bottom: 2px; }
 
 #loginBox, #appBox { display: flex; flex-direction: column; justify-content: center; max-width: 400px; margin: auto; width: 100%; }
 #appBox { max-width: 100%; }
+.tab-row { display: flex; gap: 4px; margin-bottom: 8px; }
+.tab-btn { flex: 1; font-size: 11px; padding: 6px; background: #020503; color: #00ff66; border: 1px solid #00ff6644; }
+.tab-btn.active { background: #00ff66; color: #030805; }
+body.admin-mode .tab-btn { background: #05020a; color: #cc66ff; border-color: #cc66ff44; }
+body.admin-mode .tab-btn.active { background: #cc66ff; color: #10001a; }
 </style>
 </head>
 <body>
@@ -132,23 +162,39 @@ body.panic-mode .avatar { border-color: #ff3333; }
 <h1 id="mainTitle">[ SECURECORE X // KOMBİNATORYAL KOMUTA MERKEZİ ]</h1>
 
 <div id="loginBox">
-  <div style="font-size: 12px; color: #00bb55; margin-bottom: 10px; text-align: center;">> KİMLİK DOĞRULAMA GEREKLİ</div>
-  <input id="email" placeholder="Operatör E-posta">
-  <input id="password" type="password" placeholder="Şifre">
-  <input id="nickname" placeholder="Kod Adı (Takma Ad)">
-  <input id="avatarURL" placeholder="Birim İkon URL (Opsiyonel)">
-  <button onclick="login()">BAĞLANTI KUR [ AUTH ]</button>
+  <div class="tab-row">
+    <button class="tab-btn active" id="tabOpBtn" onclick="switchLoginTab('operator')">OPERATÖR GİRİŞİ</button>
+    <button class="tab-btn" id="tabAdminBtn" onclick="switchLoginTab('admin')">YÖNETİCİ [ ADMIN ]</button>
+  </div>
+  
+  <div id="operatorLoginForm">
+    <div style="font-size: 11px; color: #00bb55; margin-bottom: 8px; text-align: center;">> STANDART BİRİM KİMLİK DOĞRULAMA</div>
+    <input id="email" placeholder="Operatör E-posta">
+    <input id="password" type="password" placeholder="Şifre">
+    <input id="nickname" placeholder="Kod Adı (Takma Ad)">
+    <input id="avatarURL" placeholder="Birim İkon URL (Opsiyonel)">
+    <button onclick="login('operator')">BAĞLANTI KUR [ AUTH ]</button>
+  </div>
+
+  <div id="adminLoginForm" style="display:none;">
+    <div style="font-size: 11px; color: #cc66ff; margin-bottom: 8px; text-align: center;">> 👑 ÜST DÜZEY YÖNETİCİ ERİŞİM KARTI</div>
+    <input id="adminEmail" placeholder="Yönetici E-posta">
+    <input id="adminPassword" type="password" placeholder="Yönetici Ana Şifre">
+    <input id="adminSecretKey" type="password" placeholder="Sistem Master Key (Omega metrix99)" value="Omega metrix99">
+    <button onclick="login('admin')" style="border-color: #cc66ff; color: #cc66ff; background: #1a0033;">YÖNETİCİ OTURUMU AÇ [ ROOT ]</button>
+  </div>
 </div>
 
 <div id="appBox" style="display:none;flex:1;flex-direction:column;">
   <div style="display:flex; gap: 6px;">
     <input id="room" placeholder="Sığınak / Kanal Kodu" style="flex:1;">
-    <input id="secretKey" placeholder="AES Frekans Anahtarı" style="flex:1;" type="password">
+    <input id="secretKey" placeholder="AES Frekans Anahtarı (Opsiyonel for Admin)" style="flex:1;" type="password">
     <button onclick="connectRoom()" style="padding: 0 16px;">[ KANALA GİR ]</button>
   </div>
   
   <div style="display: flex; gap: 8px; margin-bottom: 6px;">
     <button id="voiceToggleBtn" class="voice-btn" onclick="toggleVoice()" disabled>🎤 ŞİFRELİ SESLİ BAĞLANTI</button>
+    <button id="adminWipeBtn" style="display:none; background: #330033; border-color: #cc66ff; color: #cc66ff;" onclick="adminGlobalWipe()">🔥 [ADMIN] KANALI TAMAMEN TEMİZLE</button>
   </div>
 
   <div class="crypto-card">
@@ -202,6 +248,8 @@ let presenceRef = null;
 let currentUserData = null;
 let typingTimeout = null;
 let isPanicActive = false;
+let isAdminUser = false;
+let adminMasterKey = "Omega metrix99";
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playBip(freq = 440, type = 'sine', duration = 0.05) {
@@ -240,11 +288,45 @@ function generateCMAC(userId, timestamp) {
   return (C2(a) + C3(b) + SYSTEM_SECRET_K * (a + b)) % M_PRIME;
 }
 
-function login(){
+function switchLoginTab(type){
+  playBip(500);
+  if(type === 'operator'){
+    document.getElementById('tabOpBtn').classList.add('active');
+    document.getElementById('tabAdminBtn').classList.remove('active');
+    document.getElementById('operatorLoginForm').style.display = 'block';
+    document.getElementById('adminLoginForm').style.display = 'none';
+  } else {
+    document.getElementById('tabAdminBtn').classList.add('active');
+    document.getElementById('tabOpBtn').classList.remove('active');
+    document.getElementById('operatorLoginForm').style.display = 'none';
+    document.getElementById('adminLoginForm').style.display = 'block';
+  }
+}
+
+function login(type){
   playBip(800);
-  auth.signInWithEmailAndPassword(document.getElementById("email").value, document.getElementById("password").value)
+  let email, password;
+  if(type === 'operator'){
+    email = document.getElementById("email").value;
+    password = document.getElementById("password").value;
+  } else {
+    email = document.getElementById("adminEmail").value;
+    password = document.getElementById("adminPassword").value;
+    adminMasterKey = document.getElementById("adminSecretKey").value;
+    if(!adminMasterKey) return alert("YÖNETİCİ HATA: Master şifresi girmek zorundasınız!");
+  }
+
+  auth.signInWithEmailAndPassword(email, password)
   .then(async (uc)=>{
-    currentUserData = { nickname: document.getElementById("nickname").value || "Birim-X", avatar: document.getElementById("avatarURL").value || '' };
+    if(type === 'admin'){
+      isAdminUser = true;
+      currentUserData = { nickname: "[👑 YÖNETİCİ] Root-Commander", avatar: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop" };
+      document.body.classList.add("admin-mode");
+      document.getElementById("adminWipeBtn").style.display = "block";
+    } else {
+      isAdminUser = false;
+      currentUserData = { nickname: document.getElementById("nickname").value || "Birim-X", avatar: document.getElementById("avatarURL").value || '' };
+    }
     await db.ref("users/"+uc.user.uid).set(currentUserData);
     loginBox.style.display="none"; appBox.style.display="flex";
   }).catch(e=>alert("ERİŞİM REDDEDİLDİ: "+e.message));
@@ -255,7 +337,14 @@ auth.onAuthStateChanged(async u=>{
     loginBox.style.display="none"; appBox.style.display="flex";
     const snap = await db.ref("users/"+u.uid).get();
     currentUserData = snap.val() || { nickname: "Birim-X", avatar: "" };
-    document.getElementById("watermark").textContent = `SECURECORE ULTIMATE // OPERATÖR: ${currentUserData.nickname}`;
+    
+    if(currentUserData.nickname && currentUserData.nickname.includes("[👑 YÖNETİCİ]")){
+      isAdminUser = true;
+      document.body.classList.add("admin-mode");
+      document.getElementById("adminWipeBtn").style.display = "block";
+    }
+    
+    document.getElementById("watermark").textContent = `SECURECORE ULTIMATE // BİRİM: ${currentUserData.nickname}`;
   }
 });
 
@@ -278,6 +367,15 @@ function handleTyping(){
   typingTimeout = setTimeout(()=> tRef.remove(), 2000);
 }
 
+async function adminGlobalWipe(){
+  if(!isAdminUser) return;
+  if(confirm("DİKKAT: Bu kanaldaki TÜM veriler yönetici yetkisiyle kalıcı olarak imha edilecek! Onaylıyor musunuz?")){
+    playBip(150, 'sawtooth', 0.2);
+    await db.ref("rooms/"+currentRoom+"/messages").remove();
+    document.getElementById("chat").innerHTML = `<div class="message admin-msg"><div class="decoded">[ YÖNETİCİ KOMUTU: Kanal içeriği tamamen sıfırlandı ve temizlendi. ]</div></div>`;
+  }
+}
+
 async function sendMessage(){
   playBip(600);
   const roomVal = document.getElementById("room").value;
@@ -291,7 +389,10 @@ async function sendMessage(){
     return;
   }
 
-  if(!roomVal || !keyVal) return alert("EKSİK PARAMETRE");
+  if(!roomVal) return alert("Sığınak / Kanal kodu girilmelidir.");
+  
+  const effectiveKey = (isAdminUser && !keyVal) ? adminMasterKey : keyVal;
+  if(!effectiveKey) return alert("EKSİK PARAMETRE: Frekans anahtarı gerekli.");
 
   if(mesajVal === "/clear") { document.getElementById("chat").innerHTML = ""; document.getElementById("mesaj").value=""; return; }
   if(mesajVal === "/burn") { if(confirm("TÜM KANAL GEÇMİŞİ İMHA EDİLECEK! ONAYLIYOR MUSUNUZ?")) { db.ref("rooms/"+roomVal+"/messages").remove(); document.getElementById("mesaj").value=""; return; } }
@@ -301,7 +402,7 @@ async function sendMessage(){
   const now = Date.now();
   const uid = auth.currentUser.uid;
   const cmacToken = generateCMAC(uid, now);
-  const key = await getKey(keyVal);
+  const key = await getKey(effectiveKey);
   const expireSec = parseInt(document.getElementById("expireTime").value) || 0;
   const expireAt = expireSec > 0 ? now + (expireSec * 1000) : 0;
 
@@ -332,11 +433,9 @@ async function sendMessage(){
       const filePath = `bunker_vaults/${roomVal}/${Date.now()}_${file.name}`;
       const storageRef = storage.ref().child(filePath);
       
-      // Tam uyumlu Compat SDK Storage yükleme ve URL alma yöntemi
       const snapshot = await storageRef.put(file);
       const downloadURL = await snapshot.ref.getDownloadURL();
 
-      // İndirme linkini AES-GCM ile şifreliyoruz
       const iv = crypto.getRandomValues(new Uint8Array(12));
       const cipher = await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,new TextEncoder().encode(downloadURL));
       const combined = new Uint8Array(iv.length + cipher.byteLength);
@@ -367,7 +466,9 @@ async function connectRoom(){
   playBip(900);
   const roomVal = document.getElementById("room").value;
   const keyVal = document.getElementById("secretKey").value;
-  if(!roomVal || !keyVal) return alert("Kanal kodu ve anahtar zorunludur!");
+  const effectiveKey = (isAdminUser && !keyVal) ? adminMasterKey : keyVal;
+
+  if(!roomVal || !effectiveKey) return alert("Kanal kodu ve anahtar zorunludur!");
   
   if(currentRoom){ 
     db.ref("rooms/"+currentRoom+"/messages").off();
@@ -375,7 +476,7 @@ async function connectRoom(){
     db.ref("rooms/"+currentRoom+"/typing").off();
   }
 
-  if(keyVal === PANIC_KEY){
+  if(effectiveKey === PANIC_KEY){
     isPanicActive = true;
     currentRoom = roomVal;
     document.body.classList.add("panic-mode");
@@ -384,7 +485,6 @@ async function connectRoom(){
     
     document.getElementById("chat").innerHTML = `
       <div class="message compromised"><div class="userRow"><b style="color:#ff3333">SİSTEM KONTROLÜ</b></div><div class="decoded">[ İZOLASYON AKTİF: Girilen anahtar güvenlik protokollerince tehlikeli bulundu. Bu kanal izleniyor ve dış dünyaya kapatılmıştır. ]</div><div class="small">Canlı Tehdit Analizi: Aktif</div></div>
-      <div class="message"><div class="userRow"><b style="color:#ff3333">Gözetim Birimi</b></div><div class="decoded">Sahte sığınak akışı başlatıldı. Operatör hareketleri kayıt altında tutuluyor.</div><div class="small">Durum: Stabilize Ediliyor</div></div>
     `;
     
     document.getElementById("mesaj").disabled = false;
@@ -396,10 +496,8 @@ async function connectRoom(){
   }
 
   isPanicActive = false;
-  document.body.classList.remove("panic-mode");
-  document.getElementById("mainTitle").textContent = "[ SECURECORE X // KOMBİNATORYAL KOMUTA MERKEZİ ]";
-  document.getElementById("shieldText").textContent = "> DUVAR: C-MAC Shield & Cloud Storage Aktif";
-
+  if(!isAdminUser) document.body.classList.remove("panic-mode");
+  
   currentRoom = roomVal;
   document.getElementById("chat").innerHTML="";
   
@@ -444,16 +542,17 @@ async function connectRoom(){
 
     const expectedCMAC = generateCMAC(data.uid, data.time);
     const isCompromised = (data.cmac !== expectedCMAC);
+    const isMsgAdmin = data.nickname && data.nickname.includes("[👑 YÖNETİCİ]");
 
     const div = document.createElement("div");
-    div.className = "message" + (isCompromised ? " compromised" : "");
+    div.className = "message" + (isCompromised ? " compromised" : (isMsgAdmin ? " admin-msg" : ""));
     div.id = "msg-" + id;
 
     let text = isCompromised ? "[ KRİTİK: VERİ BÜTÜNLÜĞÜ BOZULDU ]" : "[ ŞİFRE ÇÖZÜLEMEDİ / YANLIŞ FREKANS ]";
     
     if(!isCompromised){
       try{
-        const key = await getKey(keyVal);
+        const key = await getKey(effectiveKey);
         const msgObj = JSON.parse(data.message);
         const raw = b642ab(msgObj.data);
         const dec = await crypto.subtle.decrypt({name:"AES-GCM",iv:raw.slice(0,12)},key,raw.slice(12));
@@ -464,9 +563,9 @@ async function connectRoom(){
         } else {
           const blobUrl = decryptedContent; 
           if(msgObj.type.startsWith("image/")) {
-            text = `<div>[FOTOĞRAF GÖRSELİ]</div><img src="${escapeHTML(blobUrl)}" style="max-width:100%; max-height:250px; margin-top:4px; border-radius:2px;"><br><a href="${escapeHTML(blobUrl)}" target="_blank" download="${escapeHTML(msgObj.name)}" style="color:#00ff66;font-size:11px;">[ DOSYAYI TAM BOYUT AÇ / İNDİR ]</a>`;
+            text = `<div>[FOTOĞRAF GÖRSELİ]</div><img src="${escapeHTML(blobUrl)}" style="max-width:100%; max-height:250px; margin-top:4px; border-radius:2px;"><br><a href="${escapeHTML(blobUrl)}" target="_blank" download="${escapeHTML(msgObj.name)}" style="color:${isAdminUser?'#cc66ff':'#00ff66'};font-size:11px;">[ DOSYAYI TAM BOYUT AÇ / İNDİR ]</a>`;
           } else {
-            text = `<a href="${escapeHTML(blobUrl)}" target="_blank" download="${escapeHTML(msgObj.name)}" style="color:#00ff66;">[DOSYAYI İNDİR: ${escapeHTML(msgObj.name)}]</a>`;
+            text = `<a href="${escapeHTML(blobUrl)}" target="_blank" download="${escapeHTML(msgObj.name)}" style="color:${isAdminUser?'#cc66ff':'#00ff66'};">[DOSYAYI İNDİR: ${escapeHTML(msgObj.name)}]</a>`;
           }
         }
       }catch(err){
@@ -476,13 +575,16 @@ async function connectRoom(){
 
     const avatarImg = data.avatar ? `<img src="${escapeHTML(data.avatar)}" class="avatar">` : '';
     let expireInfo = data.expireAt ? ` // İMHA: ${Math.ceil((data.expireAt - Date.now())/1000)}sn` : '';
-    div.innerHTML = `<div class="userRow">${avatarImg}<b style="color:#00ff66">${escapeHTML(data.nickname)}</b> ${isCompromised ? '<span style="color:#ff3333;font-size:10px;margin-left:auto;">[İHLAL]</span>' : ''}</div>
+    div.innerHTML = `<div class="userRow">${avatarImg}<b style="color:${isMsgAdmin?'#cc66ff':'#00ff66'}">${escapeHTML(data.nickname)}</b> ${isCompromised ? '<span style="color:#ff3333;font-size:10px;margin-left:auto;">[İHLAL]</span>' : ''}</div>
                      <div class="decoded">${text}</div>
                      <div class="small">${new Date(data.time).toLocaleTimeString()}${expireInfo}</div>`;
 
-    if(auth.currentUser && auth.currentUser.uid === data.uid){
+    if(auth.currentUser && (auth.currentUser.uid === data.uid || isAdminUser)){
       const del = document.createElement("button");
-      del.textContent="[ İMHA ET ]"; del.className="delete";
+      del.textContent = isAdminUser ? "[ 👑 ADMIN İMHA ]" : "[ İMHA ET ]";
+      del.className = "delete";
+      if(isAdminUser) { del.style.background = "#26004d"; del.style.borderColor = "#cc66ff"; del.style.color = "#cc66ff"; }
+      
       del.onclick = async ()=> {
         playBip(200, 'sawtooth', 0.1);
         try {
