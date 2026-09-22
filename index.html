@@ -20,7 +20,12 @@ body{
   overflow: hidden;
 }
 
-/* CRT Tarama Çizgileri ve Güvenlik Filigranı Akışı */
+body.panic-mode {
+  background: linear-gradient(rgba(20, 2, 2, 0.9), rgba(40, 2, 2, 0.95)), 
+              url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1920&auto=format&fit=crop') no-repeat center center fixed;
+  color: #ff3333;
+}
+
 body::after {
   content: " ";
   display: block;
@@ -36,6 +41,7 @@ body::after {
   position: fixed; top: 10px; left: 10px; font-size: 10px; color: rgba(0, 255, 102, 0.15);
   pointer-events: none; z-index: 9998; letter-spacing: 2px;
 }
+body.panic-mode #watermark { color: rgba(255, 51, 51, 0.25); }
 
 .container{
   width: 95%; max-width: 950px; height: 96vh;
@@ -46,6 +52,12 @@ body::after {
   display: flex; flex-direction: column;
   box-shadow: 0 0 35px rgba(0, 255, 102, 0.2), inset 0 0 20px rgba(0, 255, 102, 0.05);
   z-index: 2;
+  transition: all 0.3s ease;
+}
+body.panic-mode .container {
+  background: rgba(15, 3, 3, 0.95);
+  border-color: #ff333366;
+  box-shadow: 0 0 35px rgba(255, 51, 51, 0.3), inset 0 0 20px rgba(255, 51, 51, 0.05);
 }
 
 h1{
@@ -54,13 +66,16 @@ h1{
   letter-spacing: 2px;
   border-bottom: 1px dashed #00ff6644; padding-bottom: 6px;
 }
+body.panic-mode h1 { color: #ff3333; text-shadow: 0 0 8px rgba(255, 51, 51, 0.6); border-bottom-color: #ff333344; }
 
 input, select{
   padding: 10px 14px; border: 1px solid #00ff6644; border-radius: 2px;
   margin: 4px 0; width: 100%; background: #020503; color: #00ff66; font-size: 14px;
   font-family: 'Share Tech Mono', monospace;
 }
+body.panic-mode input, body.panic-mode select { background: #080202; color: #ff3333; border-color: #ff333344; }
 input:focus, select:focus{ outline: none; border-color: #00ff66; box-shadow: 0 0 8px rgba(0, 255, 102, 0.4); }
+body.panic-mode input:focus { border-color: #ff3333; box-shadow: 0 0 8px rgba(255, 51, 51, 0.4); }
 
 button{
   padding: 10px 14px; border: 1px solid #00ff66; border-radius: 2px; margin: 4px 0;
@@ -68,20 +83,25 @@ button{
   font-family: 'Share Tech Mono', monospace; letter-spacing: 1px;
   transition: all 0.2s ease;
 }
+body.panic-mode button { background: #220000; color: #ff3333; border-color: #ff3333; }
 button:hover{ background: #00ff66; color: #030805; box-shadow: 0 0 10px #00ff66; }
+body.panic-mode button:hover { background: #ff3333; color: #1a0000; box-shadow: 0 0 10px #ff3333; }
 
 .voice-btn { background: #022a14; border-color: #00cc55; flex: 1; }
+body.panic-mode .voice-btn { background: #2a0202; border-color: #cc0000; }
 .voice-btn.active { background: #3a0202; border-color: #ff3333; color: #ff3333; box-shadow: 0 0 10px #ff3333; }
 
 .crypto-card {
   background: #030a06; border: 1px dashed #00ff6644; padding: 8px 12px; border-radius: 2px; margin-bottom: 6px; font-size: 11px; color: #00cc55;
   display: flex; justify-content: space-between; align-items: center;
 }
+body.panic-mode .crypto-card { background: #0a0303; border-color: #ff333344; color: #cc3333; }
 
 #chat{
   flex: 1; overflow: auto; margin: 6px 0; padding: 12px; border-radius: 2px;
   background: #020503; border: 1px solid #00ff6633;
 }
+body.panic-mode #chat { background: #050202; border-color: #ff333333; }
 
 .message{
   padding: 8px 12px; margin-bottom: 8px; border-radius: 2px;
@@ -89,11 +109,15 @@ button:hover{ background: #00ff66; color: #030805; box-shadow: 0 0 10px #00ff66;
 }
 .message.compromised { border-left-color: #ff3333; background: #120404; color: #ff9999; }
 .small{ font-size: 10px; color: #008833; margin-top: 4px; }
+body.panic-mode .small { color: #880000; }
 .delete{ background: #220000; color: #ff3333; border: 1px solid #ff3333; padding: 2px 6px; font-size: 10px; margin-top: 4px; cursor: pointer; border-radius: 2px; width: fit-content; }
 .decoded{ color: #ccffdd; font-weight: 600; word-break: break-all; margin: 4px 0; font-size: 13px; }
+body.panic-mode .decoded { color: #ffcccc; }
 .room-info{ display: flex; justify-content: space-between; font-size: 11px; color: #00bb55; margin-bottom: 6px; background: #030a06; padding: 6px 10px; border: 1px solid #00ff6633; }
+body.panic-mode .room-info { color: #bb5555; background: #0a0303; border-color: #ff333333; }
 .typing-indicator { font-size: 11px; color: #ffcc00; height: 16px; margin-bottom: 4px; }
 .avatar{ width: 22px; height: 22px; border-radius: 50%; margin-right: 8px; object-fit: cover; border: 1px solid #00ff66; }
+body.panic-mode .avatar { border-color: #ff3333; }
 .userRow{ display: flex; align-items: center; margin-bottom: 2px; }
 
 #loginBox, #appBox { display: flex; flex-direction: column; justify-content: center; max-width: 400px; margin: auto; width: 100%; }
@@ -102,12 +126,11 @@ button:hover{ background: #00ff66; color: #030805; box-shadow: 0 0 10px #00ff66;
 </head>
 <body>
 
-<div id="watermark">SECURECORE ULTIMATE // SİSTEM AKTİF // İZLEYEN: GİZLİ BİRİM</div>
+<div id="watermark">SECURECORE ULTIMATE // SİSTEM AKTİF</div>
 
 <div class="container">
-<h1>[ SECURECORE X // KOMBİNATORYAL KOMUTA MERKEZİ ]</h1>
+<h1 id="mainTitle">[ SECURECORE X // KOMBİNATORYAL KOMUTA MERKEZİ ]</h1>
 
-<!-- GİRİŞ EKRANI -->
 <div id="loginBox">
   <div style="font-size: 12px; color: #00bb55; margin-bottom: 10px; text-align: center;">> KİMLİK DOĞRULAMA GEREKLİ</div>
   <input id="email" placeholder="Operatör E-posta">
@@ -117,7 +140,6 @@ button:hover{ background: #00ff66; color: #030805; box-shadow: 0 0 10px #00ff66;
   <button onclick="login()">BAĞLANTI KUR [ AUTH ]</button>
 </div>
 
-<!-- UYGULAMA ANA EKRANI -->
 <div id="appBox" style="display:none;flex:1;flex-direction:column;">
   <div style="display:flex; gap: 6px;">
     <input id="room" placeholder="Sığınak / Kanal Kodu" style="flex:1;">
@@ -130,7 +152,7 @@ button:hover{ background: #00ff66; color: #030805; box-shadow: 0 0 10px #00ff66;
   </div>
 
   <div class="crypto-card">
-    <span>> DUVAR: C-MAC Shield & Süreli İmha Aktif</span>
+    <span id="shieldText">> DUVAR: C-MAC Shield & Süreli İmha Aktif</span>
     <select id="expireTime" style="width: 130px; padding: 4px; background: #020503; color: #00ff66; border: 1px solid #00ff6644; font-size: 11px;">
       <option value="0">İmha Yok (Kalıcı)</option>
       <option value="30">30 Saniye Sonra</option>
@@ -177,8 +199,8 @@ let currentRoom = null;
 let presenceRef = null;
 let currentUserData = null;
 let typingTimeout = null;
+let isPanicActive = false;
 
-// Web Audio API ile Sığınak Ses Efektleri (Bip / Radar Sinyali)
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playBip(freq = 440, type = 'sine', duration = 0.05) {
   if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -196,7 +218,7 @@ function playBip(freq = 440, type = 'sine', duration = 0.05) {
 
 const M_PRIME = 1000000007;
 const SYSTEM_SECRET_K = 999;
-const PANIC_KEY = "ACIL_DURUM_PANIK_99"; // Panik Modu Gizli Şifresi
+const PANIC_KEY = "ACIL_DURUM_PANIK_99";
 
 function C2(a) { return a >= 2 ? (a * (a - 1)) / 2 : 0; }
 function C3(b) { return b >= 3 ? (b * (b - 1) * (b - 2)) / 6 : 0; }
@@ -244,8 +266,8 @@ function ab2b64(buffer){ return btoa(String.fromCharCode(...new Uint8Array(buffe
 function b642ab(base64){ return Uint8Array.from(atob(base64), c=>c.charCodeAt(0)); }
 function escapeHTML(text){ const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
 
-// Hızlı Komutlar ve Yazma Göstergesi
 function handleTyping(){
+  if(isPanicActive) return;
   playBip(300, 'triangle', 0.02);
   if(!currentRoom) return;
   const tRef = db.ref("rooms/"+currentRoom+"/typing/"+auth.currentUser.uid);
@@ -261,9 +283,14 @@ async function sendMessage(){
   const mesajVal = document.getElementById("mesaj").value.trim();
   const dosyaInput = document.getElementById("dosya");
 
+  if(isPanicActive){
+    alert("PANİK MODU: Bu terminalden dışarıya veri çıkışı engellenmiştir.");
+    document.getElementById("mesaj").value = "";
+    return;
+  }
+
   if(!roomVal || !keyVal) return alert("EKSİK PARAMETRE");
 
-  // Komut Desteği (/clear veya /burn)
   if(mesajVal === "/clear") { document.getElementById("chat").innerHTML = ""; document.getElementById("mesaj").value=""; return; }
   if(mesajVal === "/burn") { if(confirm("TÜM KANAL GEÇMİŞİ İMHA EDİLECEK! ONAYLIYOR MUSUNUZ?")) { db.ref("rooms/"+roomVal+"/messages").remove(); document.getElementById("mesaj").value=""; return; } }
 
@@ -315,14 +342,38 @@ async function connectRoom(){
   const keyVal = document.getElementById("secretKey").value;
   if(!roomVal || !keyVal) return alert("Kanal kodu ve anahtar zorunludur!");
   
-  // PANİK MODU (Honeypot / Sahte Sığınak) Kontrolü
+  // Önceki odadan ayrılma (dinleyicileri temizle)
+  if(currentRoom){ 
+    db.ref("rooms/"+currentRoom+"/messages").off();
+    db.ref("rooms/"+currentRoom+"/presence").off();
+    db.ref("rooms/"+currentRoom+"/typing").off();
+  }
+
   if(keyVal === PANIC_KEY){
-    alert("DİKKAT: Panik Modu Aktif Edildi. Güvenli olmayan izolatör devreye giriyor.");
-    document.getElementById("chat").innerHTML = `<div class="message compromised"><div class="decoded">[ PANİK MODU: Bu kanal izleniyor. Bağlantı saptırıldı. ]</div></div>`;
+    isPanicActive = true;
+    currentRoom = roomVal;
+    document.body.classList.add("panic-mode");
+    document.getElementById("mainTitle").textContent = "[ ⚠️ UYARI: GÖZETİM ALTINDAKİ SAHTE SIĞINAK ]";
+    document.getElementById("shieldText").textContent = "> DUVAR: İHLAL TESPİT EDİLDİ - LOGLANİYORSUNUZ";
+    
+    document.getElementById("chat").innerHTML = `
+      <div class="message compromised"><div class="userRow"><b style="color:#ff3333">SİSTEM KONTROLÜ</b></div><div class="decoded">[ İZOLASYON AKTİF: Girilen anahtar güvenlik protokollerince tehlikeli bulundu. Bu kanal izleniyor ve dış dünyaya kapatılmıştır. ]</div><div class="small">Canlı Tehdit Analizi: Aktif</div></div>
+      <div class="message"><div class="userRow"><b style="color:#ff3333">Gözetim Birimi</b></div><div class="decoded">Sahte sığınak akışı başlatıldı. Operatör hareketleri kayıt altında tutuluyor.</div><div class="small">Durum: Stabilize Ediliyor</div></div>
+    `;
+    
+    document.getElementById("mesaj").disabled = false;
+    document.getElementById("dosya").disabled = true;
+    document.getElementById("sendBtn").disabled = false;
+    document.getElementById("voiceToggleBtn").disabled = true;
+    document.getElementById("activeUsers").textContent = "AKTİF BİRİMLER: [ GİZLİ GÖZETLEME BİRİMİ (1) ]";
     return;
   }
 
-  if(currentRoom){ db.ref("rooms/"+currentRoom+"/messages").off(); }
+  isPanicActive = false;
+  document.body.classList.remove("panic-mode");
+  document.getElementById("mainTitle").textContent = "[ SECURECORE X // KOMBİNATORYAL KOMUTA MERKEZİ ]";
+  document.getElementById("shieldText").textContent = "> DUVAR: C-MAC Shield & Süreli İmha Aktif";
+
   currentRoom = roomVal;
   document.getElementById("chat").innerHTML="";
   
@@ -341,7 +392,6 @@ async function connectRoom(){
     document.getElementById("activeUsers").textContent = "AKTİF BİRİMLER: " + (users ? Object.values(users).map(u => u.nickname).join(" | ") : "-");
   });
 
-  // Diğer kullanıcıların yazı yazma durumunu dinleme
   db.ref("rooms/"+currentRoom+"/typing").on("value", s=>{
     const typers = s.val();
     if(typers){
@@ -352,14 +402,17 @@ async function connectRoom(){
     }
   });
 
+  db.ref("rooms/"+currentRoom+"/messages").on("child_removed", snap=>{
+    const removedDiv = document.getElementById("msg-"+snap.key);
+    if(removedDiv) removedDiv.remove();
+  });
+
   db.ref("rooms/"+currentRoom+"/messages").on("child_added", async snap=>{
     const data = snap.val();
     const id = snap.key;
-    const messageRef = db.ref("rooms/"+currentRoom+"/messages/"+id);
 
-    // Süresi dolmuş mesaj otomatik imha kontrolü
     if(data.expireAt && Date.now() > data.expireAt){
-      messageRef.remove();
+      db.ref("rooms/"+currentRoom+"/messages/"+id).remove();
       return;
     }
 
@@ -368,6 +421,7 @@ async function connectRoom(){
 
     const div = document.createElement("div");
     div.className = "message" + (isCompromised ? " compromised" : "");
+    div.id = "msg-" + id;
 
     let text = isCompromised ? "[ KRİTİK: VERİ BÜTÜNLÜĞÜ BOZULDU ]" : "[ ŞİFRE ÇÖZÜLEMEDİ / YANLIŞ FREKANS ]";
     
@@ -398,7 +452,10 @@ async function connectRoom(){
     if(auth.currentUser && auth.currentUser.uid === data.uid){
       const del = document.createElement("button");
       del.textContent="[ İMHA ET ]"; del.className="delete";
-      del.onclick = ()=> messageRef.remove();
+      del.onclick = ()=> {
+        playBip(200, 'sawtooth', 0.1);
+        db.ref("rooms/"+currentRoom+"/messages/"+id).remove();
+      };
       div.appendChild(del);
     }
 
@@ -413,6 +470,7 @@ let localStream = null; let peerConnection = null; let isVoiceActive = false;
 const iceServers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
 async function toggleVoice(){
+  if(isPanicActive) return alert("Panik modunda sesli iletişim devre dışıdır.");
   const btn = document.getElementById("voiceToggleBtn");
   if(!isVoiceActive){
     try {
@@ -444,7 +502,7 @@ async function toggleVoice(){
           } else if(d.type === "answer") {
             await peerConnection.setRemoteDescription(new RTCSessionDescription(d.sdp));
           } else if(d.candidate) {
-            await peerConnection.addIceCard(new RTCIceCandidate(d.candidate));
+            await peerConnection.addIceCandidate(new RTCIceCandidate(d.candidate));
           }
         }
       });
