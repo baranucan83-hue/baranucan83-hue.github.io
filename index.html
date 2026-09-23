@@ -129,7 +129,7 @@ body.admin-mode #chat { background: #030108; border-color: #cc66ff33; }
 .small{ font-size: 10px; color: #008833; margin-top: 3px; }
 .delete{ background: #220000; color: #ff3333; border: 1px solid #ff3333; padding: 2px 6px; font-size: 10px; margin-top: 3px; cursor: pointer; border-radius: 2px; width: fit-content; }
 .decoded{ color: #ccffdd; font-weight: 600; word-break: break-all; margin: 3px 0; font-size: 12px; }
-.room-info{ display: flex; justify-content: space-between; font-size: 11px; color: #00bb55; margin-bottom: 4px; background: #030a06; padding: 5px 8px; border: 1px solid #00ff6633; }
+.room-info{ font-size: 11px; color: #00bb55; margin-bottom: 4px; background: #030a06; padding: 6px 8px; border: 1px solid #00ff6633; }
 .typing-indicator { font-size: 11px; color: #ffcc00; height: 14px; margin-bottom: 3px; }
 .avatar{ width: 20px; height: 20px; border-radius: 50%; margin-right: 6px; object-fit: cover; border: 1px solid #00ff66; }
 .userRow{ display: flex; align-items: center; margin-bottom: 2px; }
@@ -140,19 +140,33 @@ body.admin-mode #chat { background: #030108; border-color: #cc66ff33; }
 .tab-btn { flex: 1; font-size: 11px; padding: 5px; background: #020503; color: #00ff66; border: 1px solid #00ff6644; }
 .tab-btn.active { background: #00ff66; color: #030805; }
 
-/* Yönetçi Gözetim Paneli & Kamera Önizleme */
+/* Taktiksel Kamera Önizleme Kutusu */
+#tacticalPreviewBox {
+  display: flex; gap: 8px; align-items: center; background: #030a06;
+  border: 1px solid #00ff6644; padding: 4px 8px; margin-bottom: 4px; border-radius: 2px;
+}
+body.admin-mode #tacticalPreviewBox { border-color: #cc66ff44; background: #0a0314; }
+#tacticalVideoPreview { width: 90px; height: 55px; background: #000; border: 1px solid #00ff66; object-fit: cover; }
+body.admin-mode #tacticalVideoPreview { border-color: #cc66ff; }
+
+/* Sıralı Yönetçi Birim Listesi */
+.admin-user-item {
+  display: flex; justify-content: space-between; align-items: center;
+  background: #0d041a; border: 1px solid #cc66ff44; padding: 4px 8px; margin-top: 3px; border-radius: 2px; font-size: 11px; color: #e6ccff;
+}
+
+/* Yönetçi Gözetim Penceresi */
 #surveillanceOverlay {
   display: none; position: fixed; bottom: 15px; right: 15px; width: 300px;
   background: rgba(10, 5, 20, 0.95); border: 1px solid #cc66ff; border-radius: 4px;
   padding: 8px; z-index: 10000; box-shadow: 0 0 20px rgba(204, 102, 255, 0.4);
 }
 #surveillanceOverlay video { width: 100%; height: 160px; background: #000; border: 1px solid #cc66ff55; object-fit: cover; }
-#tacticalVideoPreview { display: none; }
 </style>
 </head>
 <body>
 
-<div id="watermark">SECURECORE ULTIMATE // TELEMETRY & BUNKER AKTİF</div>
+<div id="watermark">SECURECORE ULTIMATE // TELEMETRİ & BUNKER AKTİF</div>
 
 <div class="container">
 <h1 id="mainTitle">[ SECURECORE X // ENTEGRE TELEMETRİ VE KOMUTA MERKEZİ ]</h1>
@@ -190,13 +204,22 @@ body.admin-mode #chat { background: #030108; border-color: #cc66ff33; }
   
   <div style="display: flex; gap: 6px; margin-bottom: 4px;">
     <button id="voiceToggleBtn" class="voice-btn" onclick="toggleVoice()" disabled>🎤 ŞİFRELİ SESLİ BAĞLANTI</button>
-    <button onclick="toggleCamera()" class="tactical-btn" id="camFlipBtn" disabled>📷 KAMERA DEĞİŞTİR (ÖN/ARKA)</button>
-    <button onclick="takeSnapshot()" class="tactical-btn" id="snapshotBtn" disabled>📸 ANLIK ÇEKİM (SNAPSHOT)</button>
+    <button onclick="toggleCamera()" class="tactical-btn" id="camFlipBtn" disabled>📷 KAMERA DEĞİŞTİR</button>
+    <button onclick="takeSnapshot()" class="tactical-btn" id="snapshotBtn" disabled>📸 SNAPSHOT ÇEK</button>
     <button id="adminWipeBtn" style="display:none; background: #330033; border-color: #cc66ff; color: #cc66ff;" onclick="adminGlobalWipe()">🔥 [ADMIN] KANALI TEMİZLE</button>
   </div>
 
+  <!-- Canlı Taktiksel Kamera Önizleme Kutusu (Boyut hatasını önlemek için görünür element) -->
+  <div id="tacticalPreviewBox">
+    <video id="tacticalVideoPreview" autoplay playsinline muted></video>
+    <div style="font-size: 11px; flex: 1;">
+      <div id="camStatusText">> KAMERA: BEKLENİYOR...</div>
+      <div id="streamResolutionText" style="color: #008833;">Çözünürlük: --</div>
+    </div>
+  </div>
+
   <div class="crypto-card">
-    <span id="shieldText">> GPS: Konum Alınıyor... | BAT: --%</span>
+    <span id="shieldText">> GPS: Konum Bekleniyor... | BAT: --%</span>
     <select id="expireTime" style="width: 120px; padding: 3px; background: #020503; color: #00ff66; border: 1px solid #00ff6644; font-size: 11px;">
       <option value="0">İmha Yok (Kalıcı)</option>
       <option value="30">30 Saniye Sonra</option>
@@ -205,9 +228,12 @@ body.admin-mode #chat { background: #030108; border-color: #cc66ff33; }
     </select>
   </div>
 
+  <!-- Sıralı Aktif Birimler ve Gözetim Paneli -->
   <div class="room-info">
-    <div id="onlineCount">GÜVENLİK DURUMU: STABİL</div>
-    <div id="activeUsers">AKTİF BİRİMLER: -</div>
+    <div id="onlineCount" style="font-weight: bold; margin-bottom: 2px;">GÜVENLİK DURUMU: STABİL</div>
+    <div id="activeUsersList" style="display: flex; flex-direction: column; gap: 2px; max-height: 80px; overflow-y: auto;">
+      <span style="color: #008833;">Aktif birim taranıyor...</span>
+    </div>
   </div>
 
   <div id="chat"></div>
@@ -219,8 +245,6 @@ body.admin-mode #chat { background: #030108; border-color: #cc66ff33; }
 </div>
 </div>
 
-<!-- Gizli Kamera ve Canvas Elementleri -->
-<video id="tacticalVideoPreview" autoplay playsinline muted></video>
 <canvas id="snapshot-canvas" style="display:none;"></canvas>
 
 <!-- Yönetici Canlı İzleme Penceresi -->
@@ -262,7 +286,6 @@ let isPanicActive = false;
 let isAdminUser = false;
 let adminMasterKey = "Omega metrix99";
 
-// Kamera ve Telemetri Değişkenleri
 let localStream = null;
 let useFrontCamera = true;
 let isSwitching = false;
@@ -389,14 +412,16 @@ async function initDeviceSensors(uid) {
       document.getElementById("shieldText").textContent = `> GPS: ${currentLat.toFixed(4)}, ${currentLng.toFixed(4)} | BAT: ${batteryLevel}%`;
       updateTelemetryDB(uid);
     }, (error) => {
-      document.getElementById("shieldText").textContent = `> GPS: Konum Kapalı | BAT: ${batteryLevel}%`;
-    }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+      document.getElementById("shieldText").textContent = `> GPS: Konum İzni Reddedildi/Yok | BAT: ${batteryLevel}%`;
+    }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+  } else {
+    document.getElementById("shieldText").textContent = `> GPS: Desteklenmiyor | BAT: ${batteryLevel}%`;
   }
 }
 
 function updateTelemetryDB(uid) {
   if(!uid) return;
-  db.ref(`telemetry/${uid}`).update({
+  db.ref(`telemetry/${uid}`).set({
     latitude: currentLat,
     longitude: currentLng,
     battery: batteryLevel,
@@ -416,24 +441,26 @@ async function initTacticalCamera() {
     }
     const constraints = {
       video: { 
-        facingMode: useFrontCamera ? 'user' : { exact: 'environment' },
+        facingMode: useFrontCamera ? 'user' : 'environment',
         width: { ideal: 1280 }, height: { ideal: 720 }
       },
       audio: true
     };
-    try {
-      localStream = await navigator.mediaDevices.getUserMedia(constraints);
-    } catch (err) {
-      if (!useFrontCamera) {
-        constraints.video.facingMode = 'environment';
-        localStream = await navigator.mediaDevices.getUserMedia(constraints);
-      } else { throw err; }
-    }
-    document.getElementById('tacticalVideoPreview').srcObject = localStream;
+    
+    localStream = await navigator.mediaDevices.getUserMedia(constraints);
+    const videoEl = document.getElementById('tacticalVideoPreview');
+    videoEl.srcObject = localStream;
+    
+    videoEl.onloadedmetadata = () => {
+      document.getElementById('streamResolutionText').textContent = `Çözünürlük: ${videoEl.videoWidth}x${videoEl.videoHeight}`;
+    };
+
+    document.getElementById('camStatusText').textContent = `> KAMERA: AKTİF (${useFrontCamera ? 'Ön' : 'Arka'})`;
     document.getElementById('camFlipBtn').disabled = false;
     document.getElementById('snapshotBtn').disabled = false;
   } catch (error) {
     console.error("Kamera erişim hatası:", error);
+    document.getElementById('camStatusText').textContent = `> KAMERA: ERİŞİM REDDEDİLDİ`;
   } finally {
     isSwitching = false;
   }
@@ -448,7 +475,7 @@ async function toggleCamera() {
 
 function takeSnapshot() {
   const videoEl = document.getElementById('tacticalVideoPreview');
-  if (!localStream || !videoEl.videoWidth) return alert("Kamera akışı aktif değil!");
+  if (!localStream || videoEl.videoWidth === 0) return alert("Kamera akışı aktif değil veya yükleniyor!");
   
   const canvas = document.getElementById('snapshot-canvas');
   canvas.width = videoEl.videoWidth;
@@ -616,7 +643,7 @@ async function connectRoom(){
     document.getElementById("voiceToggleBtn").disabled = true;
     document.getElementById("camFlipBtn").disabled = true;
     document.getElementById("snapshotBtn").disabled = true;
-    document.getElementById("activeUsers").textContent = "AKTİF BİRİMLER: [ GİZLİ GÖZETLEME BİRİMİ (1) ]";
+    document.getElementById("activeUsersList").innerHTML = `<span style="color:#ff3333;">[ GİZLİ GÖZETLEME BİRİMİ BAĞLI ]</span>`;
     return;
   }
 
@@ -638,19 +665,40 @@ async function connectRoom(){
   presenceRef.set({nickname: currentUserData.nickname, isAdmin: isAdminUser});
   presenceRef.onDisconnect().remove();
 
-  db.ref("rooms/"+currentRoom+"/presence").on("value", s=>{
+  // Sıralı Aktif Birim Listesi ve Telemetri Gözetimi
+  db.ref("rooms/"+currentRoom+"/presence").on("value", async s => {
     const users = s.val();
-    let usersHtml = "-";
-    if(users){
-      usersHtml = Object.entries(users).map(([uId, uData]) => {
-        let nameStr = uData.nickname;
-        if(isAdminUser && uId !== auth.currentUser.uid && !uData.isAdmin){
-          nameStr += ` <button onclick="adminForceWatch('${uId}')" style="padding:1px 4px;font-size:9px;background:#26004d;color:#cc66ff;border:1px solid #cc66ff;">[İZLE]</button>`;
-        }
-        return nameStr;
-      }).join(" | ");
+    const listContainer = document.getElementById("activeUsersList");
+    listContainer.innerHTML = "";
+
+    if(!users){
+      listContainer.innerHTML = `<span style="color: #008833;">Aktif birim yok.</span>`;
+      return;
     }
-    document.getElementById("activeUsers").textContent = "AKTİF BİRİMLER: " + usersHtml;
+
+    for(const [uId, uData] of Object.entries(users)){
+      // Telemetri verilerini çek
+      const telSnap = await db.ref(`telemetry/${uId}`).get();
+      const tel = telSnap.val() || { latitude: 0, longitude: 0, battery: 100, status: "ONLINE" };
+
+      if(isAdminUser){
+        // Yönetici için sıralı admin satırı + [İZLE] butonu
+        const row = document.createElement("div");
+        row.className = "admin-user-item";
+        row.innerHTML = `
+          <span><b>${escapeHTML(uData.nickname)}</b> [BAT: ${tel.battery}% | GPS: ${tel.latitude.toFixed(2)}, ${tel.longitude.toFixed(2)}]</span>
+          ${uId !== auth.currentUser.uid && !uData.isAdmin ? `<button onclick="adminForceWatch('${uId}')" style="padding:1px 6px;font-size:9px;background:#26004d;color:#cc66ff;border:1px solid #cc66ff;">[İZLE]</button>` : '<span style="color:#cc66ff;">(Siz)</span>'}
+        `;
+        listContainer.appendChild(row);
+      } else {
+        // Operatörler için temiz liste satırı
+        const row = document.createElement("div");
+        row.style.fontSize = "11px";
+        row.style.color = "#00ff66";
+        row.innerHTML = `• ${escapeHTML(uData.nickname)} ${uData.isAdmin ? '[👑 ROOT]' : ''}`;
+        listContainer.appendChild(row);
+      }
+    }
   });
 
   // Operatör tarafı için yönetici gözetim komut dinleyicisi
