@@ -140,16 +140,24 @@ body.admin-mode #chat { background: #030108; border-color: #cc66ff33; }
 .tab-btn { flex: 1; font-size: 11px; padding: 5px; background: #020503; color: #00ff66; border: 1px solid #00ff6644; }
 .tab-btn.active { background: #00ff66; color: #030805; }
 
-/* Taktiksel Kamera Önizleme Kutusu */
-#tacticalPreviewBox {
-  display: flex; gap: 8px; align-items: center; background: #030a06;
-  border: 1px solid #00ff6644; padding: 4px 8px; margin-bottom: 4px; border-radius: 2px;
+/* Çoklu Taktiksel Kamera Izgarası */
+.camera-section {
+  display: flex; gap: 6px; margin-bottom: 4px; overflow-x: auto; padding-bottom: 4px;
 }
-body.admin-mode #tacticalPreviewBox { border-color: #cc66ff44; background: #0a0314; }
-#tacticalVideoPreview { width: 90px; height: 55px; background: #000; border: 1px solid #00ff66; object-fit: cover; }
-body.admin-mode #tacticalVideoPreview { border-color: #cc66ff; }
+.tactical-cam-box {
+  min-width: 140px; height: 100px; background: #030a06;
+  border: 1px solid #00ff6644; padding: 2px; border-radius: 2px; position: relative;
+}
+body.admin-mode .tactical-cam-box { border-color: #cc66ff44; background: #0a0314; }
+.tactical-cam-box video { width: 100%; height: 100%; background: #000; border: 1px solid #00ff66; object-fit: cover; }
+body.admin-mode .tactical-cam-box video { border-color: #cc66ff; }
+.cam-label {
+  position: absolute; bottom: 4px; left: 4px; font-size: 9px; background: rgba(0,0,0,0.7);
+  color: #00ff66; padding: 1px 3px; border-radius: 1px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+body.admin-mode .cam-label { color: #cc66ff; }
 
-/* Sıralı Yönetçi Birim Listesi */
+/* Sıralı Yönetici Birim Listesi */
 .admin-user-item {
   display: flex; justify-content: space-between; align-items: center;
   background: #0d041a; border: 1px solid #cc66ff44; padding: 4px 8px; margin-top: 3px; border-radius: 2px; font-size: 11px; color: #e6ccff;
@@ -209,12 +217,11 @@ body.admin-mode #tacticalVideoPreview { border-color: #cc66ff; }
     <button id="adminWipeBtn" style="display:none; background: #330033; border-color: #cc66ff; color: #cc66ff;" onclick="adminGlobalWipe()">🔥 [ADMIN] KANALI TEMİZLE</button>
   </div>
 
-  <!-- Canlı Taktiksel Kamera Önizleme Kutusu (Boyut hatasını önlemek için görünür element) -->
-  <div id="tacticalPreviewBox">
-    <video id="tacticalVideoPreview" autoplay playsinline muted></video>
-    <div style="font-size: 11px; flex: 1;">
-      <div id="camStatusText">> KAMERA: BEKLENİYOR...</div>
-      <div id="streamResolutionText" style="color: #008833;">Çözünürlük: --</div>
+  <!-- Canlı Kamera Izgarası (P2P Mesh Canlı Görüntüler) -->
+  <div class="camera-section" id="tacticalVideoGrid">
+    <div class="tactical-cam-box" id="localCamBox">
+      <video id="tacticalVideoPreview" autoplay playsinline muted></video>
+      <div class="cam-label" id="localCamLabel">Siz (Önizleme)</div>
     </div>
   </div>
 
@@ -289,6 +296,7 @@ let adminMasterKey = "Omega metrix99";
 let localStream = null;
 let useFrontCamera = true;
 let isSwitching = false;
+let meshPeers = {}; 
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playBip(freq = 440, type = 'sine', duration = 0.05) {
@@ -442,7 +450,7 @@ async function initTacticalCamera() {
     const constraints = {
       video: { 
         facingMode: useFrontCamera ? 'user' : 'environment',
-        width: { ideal: 1280 }, height: { ideal: 720 }
+        width: { ideal: 640 }, height: { ideal: 360 }
       },
       audio: true
     };
@@ -450,17 +458,11 @@ async function initTacticalCamera() {
     localStream = await navigator.mediaDevices.getUserMedia(constraints);
     const videoEl = document.getElementById('tacticalVideoPreview');
     videoEl.srcObject = localStream;
-    
-    videoEl.onloadedmetadata = () => {
-      document.getElementById('streamResolutionText').textContent = `Çözünürlük: ${videoEl.videoWidth}x${videoEl.videoHeight}`;
-    };
 
-    document.getElementById('camStatusText').textContent = `> KAMERA: AKTİF (${useFrontCamera ? 'Ön' : 'Arka'})`;
     document.getElementById('camFlipBtn').disabled = false;
     document.getElementById('snapshotBtn').disabled = false;
   } catch (error) {
     console.error("Kamera erişim hatası:", error);
-    document.getElementById('camStatusText').textContent = `> KAMERA: ERİŞİM REDDEDİLDİ`;
   } finally {
     isSwitching = false;
   }
@@ -475,11 +477,11 @@ async function toggleCamera() {
 
 function takeSnapshot() {
   const videoEl = document.getElementById('tacticalVideoPreview');
-  if (!localStream || videoEl.videoWidth === 0) return alert("Kamera akışı aktif değil veya yükleniyor!");
+  if (!localStream) return alert("Kamera akışı aktif değil!");
   
   const canvas = document.getElementById('snapshot-canvas');
-  canvas.width = videoEl.videoWidth;
-  canvas.height = videoEl.videoHeight;
+  canvas.width = videoEl.videoWidth || 640;
+  canvas.height = videoEl.videoHeight || 360;
   const ctx = canvas.getContext('2d');
   ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
   
@@ -611,6 +613,8 @@ async function sendMessage(){
   }
 }
 
+const iceServers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+
 async function connectRoom(){
   playBip(900);
   const roomVal = document.getElementById("room").value;
@@ -623,7 +627,7 @@ async function connectRoom(){
     db.ref("rooms/"+currentRoom+"/messages").off();
     db.ref("rooms/"+currentRoom+"/presence").off();
     db.ref("rooms/"+currentRoom+"/typing").off();
-    db.ref("rooms/"+currentRoom+"/adminCommands").off();
+    cleanupMeshPeers();
   }
 
   if(effectiveKey === PANIC_KEY){
@@ -665,7 +669,7 @@ async function connectRoom(){
   presenceRef.set({nickname: currentUserData.nickname, isAdmin: isAdminUser});
   presenceRef.onDisconnect().remove();
 
-  // Sıralı Aktif Birim Listesi ve Telemetri Gözetimi
+  // Sıralı Aktif Birim Listesi ve P2P Kamera Mesh Ağ Kurulumu
   db.ref("rooms/"+currentRoom+"/presence").on("value", async s => {
     const users = s.val();
     const listContainer = document.getElementById("activeUsersList");
@@ -677,12 +681,10 @@ async function connectRoom(){
     }
 
     for(const [uId, uData] of Object.entries(users)){
-      // Telemetri verilerini çek
       const telSnap = await db.ref(`telemetry/${uId}`).get();
       const tel = telSnap.val() || { latitude: 0, longitude: 0, battery: 100, status: "ONLINE" };
 
       if(isAdminUser){
-        // Yönetici için sıralı admin satırı + [İZLE] butonu
         const row = document.createElement("div");
         row.className = "admin-user-item";
         row.innerHTML = `
@@ -691,71 +693,29 @@ async function connectRoom(){
         `;
         listContainer.appendChild(row);
       } else {
-        // Operatörler için temiz liste satırı
         const row = document.createElement("div");
         row.style.fontSize = "11px";
         row.style.color = "#00ff66";
         row.innerHTML = `• ${escapeHTML(uData.nickname)} ${uData.isAdmin ? '[👑 ROOT]' : ''}`;
         listContainer.appendChild(row);
       }
+
+      // WebRTC Mesh: Diğer aktif kullanıcılar ile kamera köprüsü kur
+      if(uId !== uid && !meshPeers[uId]) {
+        setupMeshPeer(uId, uid < uId, uData.nickname);
+      }
+    }
+
+    // Odadan ayrılanları temizle
+    for(const remoteUid of Object.keys(meshPeers)){
+      if(!users[remoteUid]) {
+        meshPeers[remoteUid].close();
+        delete meshPeers[remoteUid];
+        const box = document.getElementById("cam-box-" + remoteUid);
+        if(box) box.remove();
+      }
     }
   });
-
-  // Operatör tarafı için yönetici gözetim komut dinleyicisi
-  if(!isAdminUser){
-    db.ref("rooms/"+currentRoom+"/adminCommands/"+auth.currentUser.uid).on("child_added", async snap => {
-      const cmd = snap.val();
-      if(cmd.action === "watch_start"){
-        try {
-          const stream = localStream || await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-          const pConn = new RTCPeerConnection(iceServers);
-          stream.getTracks().forEach(track => pConn.addTrack(track, stream));
-          
-          pConn.onicecandidate = e => {
-            if(e.candidate) db.ref(`rooms/${currentRoom}/adminSignals/${auth.currentUser.uid}`).push({ candidate: e.candidate.toJSON(), sender: "target" });
-          };
-
-          const offer = await pConn.createOffer();
-          await pConn.setLocalDescription(offer);
-          db.ref(`rooms/${currentRoom}/adminSignals/${auth.currentUser.uid}`).set({ type: "offer", sdp: offer });
-
-          db.ref(`rooms/${currentRoom}/adminSignals/${auth.currentUser.uid}`).on("child_added", async s2 => {
-            const val = s2.val();
-            if(val && val.type === "answer") {
-              await pConn.setRemoteDescription(new RTCSessionDescription(val.sdp));
-            } else if(val && val.candidate) {
-              await pConn.addIceCandidate(new RTCIceCandidate(val.candidate));
-            }
-          });
-        } catch(err) {
-          alert("Admin kamera/mikrofon erişim talebi reddedildi: " + err.message);
-        }
-      }
-    });
-  }
-
-  // Yönetici tarafı için hedef birimin kameralarını alma dinleyicisi
-  if(isAdminUser){
-    db.ref(`rooms/${currentRoom}/adminSignals`).on("child_added", async snap => {
-      const targetUid = snap.key;
-      const data = snap.val();
-      if(data && data.type === "offer") {
-        const adminPC = new RTCPeerConnection(iceServers);
-        adminPC.ontrack = e => {
-          document.getElementById("surveillanceOverlay").style.display = "block";
-          document.getElementById("remoteSurveillanceVideo").srcObject = e.streams[0];
-        };
-        adminPC.onicecandidate = e => {
-          if(e.candidate) db.ref(`rooms/${currentRoom}/adminSignals/${targetUid}`).push({ candidate: e.candidate.toJSON(), sender: "admin" });
-        };
-
-        await adminPC.setRemoteDescription(new RTCSessionDescription(data.sdp));
-        const answer = await adminPC.createAnswer();
-        await adminPC.setLocalDescription(answer);
-        db.ref(`rooms/${currentRoom}/adminSignals/${targetUid}`).update({ type: "answer", sdp: answer });
-      }
-    });
-  }
 
   db.ref("rooms/"+currentRoom+"/typing").on("value", s=>{
     const typers = s.val();
@@ -848,6 +808,84 @@ async function connectRoom(){
   });
 }
 
+// --- WebRTC P2P Çoklu Kamera (Mesh) Fonksiyonları ---
+function setupMeshPeer(remoteUid, isInitiator, remoteNickname) {
+  const pc = new RTCPeerConnection(iceServers);
+  meshPeers[remoteUid] = pc;
+
+  if(localStream) {
+    localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+  }
+
+  pc.ontrack = event => {
+    let camBox = document.getElementById("cam-box-" + remoteUid);
+    if(!camBox) {
+      camBox = document.createElement("div");
+      camBox.className = "tactical-cam-box";
+      camBox.id = "cam-box-" + remoteUid;
+      
+      const v = document.createElement("video");
+      v.autoplay = true;
+      v.playsInline = true;
+      v.srcObject = event.streams[0];
+      
+      const lbl = document.createElement("div");
+      lbl.className = "cam-label";
+      lbl.textContent = remoteNickname || "Birim";
+      
+      camBox.appendChild(v);
+      camBox.appendChild(lbl);
+      document.getElementById("tacticalVideoGrid").appendChild(camBox);
+    }
+  };
+
+  pc.onicecandidate = event => {
+    if(event.candidate) {
+      db.ref(`rooms/${currentRoom}/meshSignals/${auth.currentUser.uid}/${remoteUid}`).push({
+        type: "candidate",
+        candidate: event.candidate.toJSON()
+      });
+    }
+  };
+
+  db.ref(`rooms/${currentRoom}/meshSignals/${remoteUid}/${auth.currentUser.uid}`).on("child_added", async snap => {
+    const data = snap.val();
+    if(!data) return;
+    if(data.type === "offer" && !isInitiator) {
+      await pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      db.ref(`rooms/${currentRoom}/meshSignals/${auth.currentUser.uid}/${remoteUid}`).push({
+        type: "answer",
+        sdp: answer
+      });
+    } else if(data.type === "answer" && isInitiator) {
+      await pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
+    } else if(data.candidate) {
+      await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+    }
+  });
+
+  if(isInitiator) {
+    pc.createOffer().then(offer => {
+      pc.setLocalDescription(offer);
+      db.ref(`rooms/${currentRoom}/meshSignals/${auth.currentUser.uid}/${remoteUid}`).push({
+        type: "offer",
+        sdp: offer
+      });
+    });
+  }
+}
+
+function cleanupMeshPeers() {
+  for(const uid of Object.keys(meshPeers)){
+    meshPeers[uid].close();
+    const box = document.getElementById("cam-box-" + uid);
+    if(box) box.remove();
+  }
+  meshPeers = {};
+}
+
 function adminForceWatch(targetUid){
   playBip(750, 'square', 0.1);
   db.ref(`rooms/${currentRoom}/adminCommands/${targetUid}`).push({ action: "watch_start", time: Date.now() });
@@ -865,8 +903,6 @@ function closeSurveillance(){
 
 // WebRTC Sesli İletişim Fonksiyonları
 let peerConnection = null; let isVoiceActive = false;
-const iceServers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
-
 async function toggleVoice(){
   if(isPanicActive) return alert("Panik modunda sesli iletişim devre dışıdır.");
   const btn = document.getElementById("voiceToggleBtn");
